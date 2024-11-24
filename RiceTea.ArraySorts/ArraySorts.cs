@@ -1,11 +1,11 @@
-﻿using SortAlgorithms.Internal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System;
+using RiceTea.ArraySorts.Internal;
 
-namespace SortAlgorithms
+namespace RiceTea.ArraySorts
 {
-    public static class SortHelper
+    public static class ArraySorts
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void QuickSort<T>(T[] array, IComparer<T> comparer = null) where T : unmanaged

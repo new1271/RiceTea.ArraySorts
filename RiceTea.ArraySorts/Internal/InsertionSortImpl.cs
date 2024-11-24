@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SortAlgorithms.Internal
+namespace RiceTea.ArraySorts.Internal
 {
     internal static unsafe class InsertionSortImpl
     {

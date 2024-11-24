@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SortAlgorithms.Memory
+namespace RiceTea.ArraySorts.Memory
 {
     internal sealed class DefaultMemoryAllocator : IMemoryAllocator
     {

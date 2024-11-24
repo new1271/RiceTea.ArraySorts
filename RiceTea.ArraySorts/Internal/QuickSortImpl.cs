@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SortAlgorithms.Internal
+namespace RiceTea.ArraySorts.Internal
 {
     internal static unsafe class QuickSortImpl
     {
@@ -43,8 +43,8 @@ namespace SortAlgorithms.Internal
             T* rightPointer = ptrLast + 1;
             while (true)
             {
-                while (comparer.Compare(*(++leftPointer), pivot) < 0) ;
-                while (comparer.Compare(*(--rightPointer), pivot) > 0) ;
+                while (comparer.Compare(*++leftPointer, pivot) < 0) ;
+                while (comparer.Compare(*--rightPointer, pivot) > 0) ;
                 if (leftPointer >= rightPointer)
                     break;
                 T temp = *leftPointer;

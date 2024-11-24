@@ -1,13 +1,13 @@
 ﻿
 using InlineMethod;
 
-using SortAlgorithms.Config;
-using SortAlgorithms.Memory;
+using RiceTea.ArraySorts.Config;
+using RiceTea.ArraySorts.Memory;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SortAlgorithms.Internal
+namespace RiceTea.ArraySorts.Internal
 {
     internal static unsafe class MergeSortImpl
     {
@@ -52,7 +52,7 @@ namespace SortAlgorithms.Internal
                 return;
             }
             uint size = unchecked((uint)(count * sizeof(T)));
-            IMemoryAllocator allocator = SortAlgorithmConfig.MemoryAllocator;
+            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
             T* space = (T*)allocator.AllocMemory(size);
             UnsafeHelper.CopyBlock(space, ptr, size);
             Merge(ptr, space, pivot, ptrEnd, comparer);

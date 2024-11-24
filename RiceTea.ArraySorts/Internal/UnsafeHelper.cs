@@ -3,11 +3,12 @@
 using System.Runtime.CompilerServices;
 using System.Security;
 
+
 #if NET472_OR_GREATER
 using InlineIL;
 #endif
 
-namespace SortAlgorithms.Internal
+namespace RiceTea.ArraySorts.Internal
 {
     internal sealed unsafe class UnsafeHelper
     {

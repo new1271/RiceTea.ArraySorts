@@ -1,4 +1,4 @@
-﻿namespace SortAlgorithms.Memory
+﻿namespace RiceTea.ArraySorts.Memory
 {
     public unsafe interface IMemoryAllocator
     {

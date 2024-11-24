@@ -1,10 +1,10 @@
-﻿using SortAlgorithms.Memory;
+﻿using RiceTea.ArraySorts.Memory;
 
-namespace SortAlgorithms.Config
+namespace RiceTea.ArraySorts.Config
 {
-    public static class SortAlgorithmConfig
+    public static class ArraySortsConfig
     {
-        static SortAlgorithmConfig()
+        static ArraySortsConfig()
         {
             MemoryAllocator = DefaultMemoryAllocator = new DefaultMemoryAllocator();
         }
