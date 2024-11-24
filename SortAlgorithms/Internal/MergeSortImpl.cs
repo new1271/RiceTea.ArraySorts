@@ -54,12 +54,12 @@ namespace SortAlgorithms.Internal
             uint size = unchecked((uint)(count * sizeof(T)));
             IMemoryAllocator allocator = SortAlgorithmConfig.MemoryAllocator;
             T* space = (T*)allocator.AllocMemory(size);
-            Unsafe.CopyBlock(space, ptr, size);
+            UnsafeHelper.CopyBlock(space, ptr, size);
             Merge(ptr, space, pivot, ptrEnd, comparer);
             allocator.FreeMemory(space);
         }
 
-        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Merge(T* ptr, T* space, T* pivot, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
@@ -91,9 +91,9 @@ namespace SortAlgorithms.Internal
             {
                 uint size = unchecked((uint)(count * sizeof(T)));
                 if (iteratorLeft < spacePivot)
-                    Unsafe.CopyBlock(iterator, iteratorLeft, size);
+                    UnsafeHelper.CopyBlock(iterator, iteratorLeft, size);
                 else
-                    Unsafe.CopyBlock(iterator, iteratorRight, size);
+                    UnsafeHelper.CopyBlock(iterator, iteratorRight, size);
             }
         }
 

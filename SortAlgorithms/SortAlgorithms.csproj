@@ -20,7 +20,24 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="LocalsInit.Fody" Version="1.1.0" />
-		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0" />
 	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<WeaverConfiguration>
+			<Weavers>
+				<InlineIL />
+				<InlineMethod />
+				<LocalsInit />
+			</Weavers>
+		</WeaverConfiguration>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<WeaverConfiguration>
+			<Weavers>
+				<InlineIL />
+			</Weavers>
+		</WeaverConfiguration>
+	</PropertyGroup>
 	
 </Project>
