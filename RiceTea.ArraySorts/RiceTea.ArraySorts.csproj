@@ -8,14 +8,31 @@
 		<Deterministic>True</Deterministic>
 		<Platforms>AnyCPU</Platforms>
 		<LangVersion>latest</LangVersion>
+		<Authors>RiceTea</Authors>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/new1271/RiceTea.ArraySorts</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/new1271/RiceTea.ArraySorts.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\LICENSE.txt">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Fody" Version="6.8.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="InlineIL.Fody" Version="1.9.0" >
+		<PackageReference Include="InlineIL.Fody" Version="1.9.0">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="InlineMethod.Fody" Version="0.7.4">
