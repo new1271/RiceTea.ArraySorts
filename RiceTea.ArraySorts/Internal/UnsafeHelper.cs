@@ -1,12 +1,9 @@
-﻿using InlineMethod;
+﻿using InlineIL;
+
+using InlineMethod;
 
 using System.Runtime.CompilerServices;
 using System.Security;
-
-
-#if NET472_OR_GREATER
-using InlineIL;
-#endif
 
 namespace RiceTea.ArraySorts.Internal
 {
@@ -39,6 +36,28 @@ namespace RiceTea.ArraySorts.Internal
             IL.Push(byteCount);
             IL.Emit.Cpblk();
 #endif
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [SecurityCritical]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsGreaterThan<T>(T a, T b)
+        {
+            IL.Push(a);
+            IL.Push(b);
+            IL.Emit.Cgt();
+            return IL.Return<bool>();
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [SecurityCritical]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsLessThan<T>(T a, T b)
+        {
+            IL.Push(a);
+            IL.Push(b);
+            IL.Emit.Clt();
+            return IL.Return<bool>();
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using InlineMethod;
+using RiceTea.Numerics;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.InsertionSort
 {
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
-    internal static unsafe class InsertionSortImplUnsafe<T>
+    internal static unsafe class InsertionSortImplUnmanaged<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
@@ -15,8 +16,8 @@ namespace RiceTea.ArraySorts.Internal
             if (count < 2 || SortUtils.ShortCircuitSort(ptr, count, comparer))
                 return;
             SortCore(ptr, ptrEnd, comparer);
-        }        
-        
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SortWithoutCheck(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {

@@ -1,33 +1,37 @@
 ﻿
 using InlineMethod;
-
 using RiceTea.ArraySorts.Config;
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.MergeSort
 {
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
-    internal static unsafe class MergeSortImplUnsafe<T>
+    internal static unsafe class MergeSortImplUnmanaged<T>
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
+        {
+            SortCore(ptr, ptrEnd, comparer, ArraySortsConfig.MemoryAllocator);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer, IMemoryAllocator allocator)
+        private static void SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer, IMemoryAllocator allocator)
         {
             long count = ptrEnd - ptr;
             if (count <= 64)
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
                     return;
-                BinaryInsertionSortImplUnsafe<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
                 return;
             }
-            if (allocator is null)
-                allocator = ArraySortsConfig.MemoryAllocator;
             T* pivot = ptr + (count >> 1);
-            Sort(ptr, pivot, comparer, allocator);
-            Sort(pivot, ptrEnd, comparer, allocator);
+            SortCore(ptr, pivot, comparer, allocator);
+            SortCore(pivot, ptrEnd, comparer, allocator);
             Merge(ptr, pivot, ptrEnd, comparer, allocator);
         }
 
@@ -43,7 +47,7 @@ namespace RiceTea.ArraySorts.Internal
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
                     return;
-                BinaryInsertionSortImplUnsafe<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
                 return;
             }
             uint size = unchecked((uint)(count * sizeof(T)));

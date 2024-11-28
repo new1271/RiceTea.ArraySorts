@@ -1,40 +1,11 @@
 ﻿using InlineMethod;
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.InsertionSort
 {
-    internal static class InsertionSortImpl
-    {
-        [Inline(InlineBehavior.Remove)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(IList<T> list, IComparer<T> comparer)
-        {
-            if (list is T[] array)
-            {
-                Type type = typeof(T);
-                if (type.IsPrimitive || type.IsValueType)
-                {
-#pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
-                    //Do unsafe sort
-                    unsafe
-                    {
-                        fixed (T* ptr = array)
-                        {
-                            InsertionSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer);
-                        }
-                    }
-                    return;
-#pragma warning restore CS8500
-                }
-            }
-            InsertionSortImpl<T>.Sort(list, 0, list.Count, comparer);
-        }
-    }
-
-    internal static class InsertionSortImpl<T>
+    internal static class InsertionSortImplManaged<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)

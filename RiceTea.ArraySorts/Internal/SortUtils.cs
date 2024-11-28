@@ -1,10 +1,14 @@
-﻿using InlineIL;
+﻿using InlineMethod;
 
-using InlineMethod;
+using RiceTea.Numerics;
 
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+
+#if !DEBUG
+using InlineIL;
+#endif
 
 namespace RiceTea.ArraySorts.Internal
 {
@@ -98,6 +102,36 @@ namespace RiceTea.ArraySorts.Internal
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool ShortCircuitSort<T>(T* ptr, long count)
+        {
+            switch (count)
+            {
+                case 2:
+                    {
+                        T* ptr1 = ptr + 1;
+                        T a = *ptr;
+                        T b = *ptr1;
+                        if (new PackedPrimitive<T>(a) > b)
+                        {
+                            *ptr = b;
+                            *ptr1 = a;
+                        }
+                    }
+                    return true;
+                case 3:
+                    {
+                        T* ptr1 = ptr + 1;
+                        T* ptr2 = ptr + 2;
+                        Sort3(ref *ptr, ref *ptr1, ref *ptr2);
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool ShortCircuitSort<T>(T* ptr, long count, IComparer<T> comparer)
         {
             switch (count)
@@ -127,6 +161,28 @@ namespace RiceTea.ArraySorts.Internal
         }
 
         [Inline(InlineBehavior.Remove)]
+        private static unsafe bool Sort3<T>(ref T a, ref T b, ref T c)
+        {
+            bool isDirty = false;
+            if (new PackedPrimitive<T>(a) > b)
+            {
+                (a, b) = (b, a);
+                isDirty = true;
+            }
+            if (new PackedPrimitive<T>(b) > c)
+            {
+                (b, c) = (c, b);
+                isDirty = true;
+            }
+            if (new PackedPrimitive<T>(a) > c)
+            {
+                (a, c) = (c, a);
+                isDirty = true;
+            }
+            return isDirty;
+        }
+
+        [Inline(InlineBehavior.Remove)]
         private static unsafe bool Sort3<T>(ref T a, ref T b, ref T c, IComparer<T> comparer)
         {
             bool isDirty = false;
@@ -146,6 +202,58 @@ namespace RiceTea.ArraySorts.Internal
                 isDirty = true;
             }
             return isDirty;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static unsafe T* BinarySearchForNGI<T>(T* ptr, T* ptrEnd, T item) //NGI = Nearest Greater Item
+        {
+            long count = ptrEnd - ptr;
+            if (count < 4L)
+            {
+                if (count < 2L)
+                {
+                    if (ptr < ptrEnd)
+                        return (new PackedPrimitive<T>(item) >= *ptr) ? ptr + 1 : ptr;
+                    return ptr;
+                }
+                while (ptr < ptrEnd && (new PackedPrimitive<T>(item) >= *ptr))
+                {
+                    ptr++;
+                }
+                return ptr;
+            }
+            T* ptrMiddle = ptr + ((count - 1) >> 1);
+            PackedPrimitive<T> packedItem = item;
+            PackedPrimitive<T> packedMiddle = *ptrMiddle;
+            if (packedItem == packedMiddle)
+                return ptrMiddle + 1;
+            if (packedItem > packedMiddle)
+            {
+#if DEBUG
+                return BinarySearchForNGI(ptrMiddle + 1, ptrEnd, item);
+#else
+                IL.Push(ptrMiddle + 1);
+                IL.Push(ptrEnd);
+                IL.Push(item);
+                IL.Emit.Tail();
+                IL.Emit.Call(new MethodRef(typeof(SortUtils), nameof(BinarySearchForNGI), typeof(T*), typeof(T*), typeof(T))
+                    .MakeGenericMethod(typeof(T)));
+                IL.Emit.Ret();
+                throw IL.Unreachable();
+#endif
+            }
+#if DEBUG
+            return BinarySearchForNGI(ptr, ptrMiddle, item);
+#else
+            IL.Push(ptr);
+            IL.Push(ptrMiddle);
+            IL.Push(item);
+            IL.Emit.Tail();
+            IL.Emit.Call(new MethodRef(typeof(SortUtils), nameof(BinarySearchForNGI), typeof(T*), typeof(T*), typeof(T))
+                .MakeGenericMethod(typeof(T)));
+            IL.Emit.Ret();
+            throw IL.Unreachable();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

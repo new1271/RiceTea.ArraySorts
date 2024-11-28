@@ -3,6 +3,10 @@ using System.Runtime.CompilerServices;
 using System;
 using RiceTea.ArraySorts.Internal;
 using System.Collections;
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
+using RiceTea.ArraySorts.Internal.InsertionSort;
+using RiceTea.ArraySorts.Internal.MergeSort;
+using RiceTea.ArraySorts.Internal.QuickSort;
 
 namespace RiceTea.ArraySorts
 {
@@ -13,7 +17,7 @@ namespace RiceTea.ArraySorts
         {
             if (list is null || list.Count <= 0)
                 return;
-            QuickSortImpl.Sort(list, comparer ?? Comparer<T>.Default);
+            QuickSortImpl.Sort(list, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -21,7 +25,7 @@ namespace RiceTea.ArraySorts
         {
             if (list is null || list.Count <= 0)
                 return;
-            BinaryInsertionSortImpl.Sort(list, comparer ?? Comparer<T>.Default);
+            BinaryInsertionSortImpl.Sort(list, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,7 +33,7 @@ namespace RiceTea.ArraySorts
         {
             if (list is null || list.Count <= 0)
                 return;
-            InsertionSortImpl.Sort(list, comparer ?? Comparer<T>.Default);
+            InsertionSortImpl.Sort(list, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,7 +41,7 @@ namespace RiceTea.ArraySorts
         {
             if (list is null || list.Count <= 0)
                 return;
-            MergeSortImpl.Sort(list, comparer ?? Comparer<T>.Default);
+            MergeSortImpl.Sort(list, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,17 +52,17 @@ namespace RiceTea.ArraySorts
             switch (list)
             {
                 case T[] array:
-                    Array.Sort(array, comparer ?? Comparer<T>.Default);
+                    Array.Sort(array, comparer);
                     return;
                 case List<T> _list:
-                    _list.Sort(comparer ?? Comparer<T>.Default);
+                    _list.Sort(comparer);
                     return;
                 case IList _list:
                     {
                         ArrayList arrayList = ArrayList.Adapter(_list);
                         if (comparer is null)
                         {
-                            arrayList.Sort(Comparer<T>.Default);
+                            arrayList.Sort();
                             return;
                         }
                         if (comparer is IComparer objectComparer)

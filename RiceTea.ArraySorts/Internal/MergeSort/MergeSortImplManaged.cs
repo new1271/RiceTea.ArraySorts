@@ -1,62 +1,36 @@
 ﻿
 using InlineMethod;
-
 using RiceTea.ArraySorts.Config;
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.MergeSort
 {
-    internal static unsafe class MergeSortImpl
-    {
-        [Inline(InlineBehavior.Remove)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(IList<T> list, IComparer<T> comparer)
-        {
-            if (list is T[] array)
-            {
-                Type type = typeof(T);
-                if (type.IsPrimitive || type.IsValueType)
-                {
-#pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
-                    //Do unsafe sort
-                    unsafe
-                    {
-                        fixed (T* ptr = array)
-                        {
-                            MergeSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer, null);
-                        }
-                    }
-                    return;
-#pragma warning restore CS8500
-                }
-            }
-            MergeSortImpl<T>.Sort(list, 0, list.Count, comparer, null);
-        }
-    }
-
-    internal static unsafe class MergeSortImpl<T>
+    internal static unsafe class MergeSortImplManaged<T>
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
+        public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
+        {
+            SortCore(list, startIndex, endIndex, comparer, ArraySortsConfig.DefaultMemoryAllocator);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
         {
             int count = endIndex - startIndex;
             if (count <= 64)
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;
-                BinaryInsertionSortImpl<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
-            if (allocator is null)
-                allocator = ArraySortsConfig.MemoryAllocator;
             int pivotIndex = startIndex + (count >> 1);
-            Sort(list, startIndex, pivotIndex, comparer, allocator);
-            Sort(list, pivotIndex, endIndex, comparer, allocator);
+            SortCore(list, startIndex, pivotIndex, comparer, allocator);
+            SortCore(list, pivotIndex, endIndex, comparer, allocator);
             Merge(list, startIndex, pivotIndex, endIndex, comparer, allocator);
         }
 
@@ -72,7 +46,7 @@ namespace RiceTea.ArraySorts.Internal
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;
-                BinaryInsertionSortImpl<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
             T[] space = allocator.AllocArray<T>(count);

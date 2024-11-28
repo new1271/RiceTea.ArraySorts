@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.QuickSort
 {
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
     internal static unsafe class QuickSortImplUnsafe<T>
@@ -21,7 +22,7 @@ namespace RiceTea.ArraySorts.Internal
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptrStart, count, comparer))
                     return;
-                BinaryInsertionSortImplUnsafe<T>.SortWithoutCheck(ptrStart, ptrLast + 1, comparer);
+                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptrStart, ptrLast + 1, comparer);
                 return;
             }
 

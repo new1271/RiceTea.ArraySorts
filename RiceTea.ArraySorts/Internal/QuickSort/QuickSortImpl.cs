@@ -1,10 +1,10 @@
 ﻿using InlineMethod;
-
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace RiceTea.ArraySorts.Internal
+namespace RiceTea.ArraySorts.Internal.QuickSort
 {
     internal static class QuickSortImpl
     {
@@ -51,7 +51,7 @@ namespace RiceTea.ArraySorts.Internal
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;
-                BinaryInsertionSortImpl<T>.Sort(list, startIndex, lastIndex + 1, comparer);
+                BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, lastIndex + 1, comparer);
                 return;
             }
 
