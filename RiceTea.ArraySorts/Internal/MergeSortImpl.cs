@@ -28,14 +28,14 @@ namespace RiceTea.ArraySorts.Internal
                     {
                         fixed (T* ptr = array)
                         {
-                            MergeSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer, ArraySortsConfig.MemoryAllocator);
+                            MergeSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer, null);
                         }
                     }
                     return;
 #pragma warning restore CS8500
                 }
             }
-            MergeSortImpl<T>.Sort(list, 0, list.Count, comparer, ArraySortsConfig.MemoryAllocator);
+            MergeSortImpl<T>.Sort(list, 0, list.Count, comparer, null);
         }
     }
 
@@ -52,6 +52,8 @@ namespace RiceTea.ArraySorts.Internal
                 BinaryInsertionSortImpl<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
+            if (allocator is null)
+                allocator = ArraySortsConfig.MemoryAllocator;
             int pivotIndex = startIndex + (count >> 1);
             Sort(list, startIndex, pivotIndex, comparer, allocator);
             Sort(list, pivotIndex, endIndex, comparer, allocator);
@@ -65,8 +67,6 @@ namespace RiceTea.ArraySorts.Internal
             T right = list[pivotIndex];
             if (comparer.Compare(left, right) < 0)
                 return;
-            startIndex = SortUtils.BinarySearchForNGI(list, startIndex, pivotIndex - 1, right, comparer);
-            endIndex = SortUtils.BinarySearchForNGI(list, pivotIndex + 1, endIndex, left, comparer);
             int count = endIndex - startIndex;
             if (count <= 64)
             {

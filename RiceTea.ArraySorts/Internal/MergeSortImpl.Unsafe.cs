@@ -1,6 +1,7 @@
 ﻿
 using InlineMethod;
 
+using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Memory;
 
 using System.Collections.Generic;
@@ -15,19 +16,21 @@ namespace RiceTea.ArraySorts.Internal
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer, IMemoryAllocator allocator)
         {
             long count = ptrEnd - ptr;
-            if (count <= 64L)
+            if (count <= 64)
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
                     return;
                 BinaryInsertionSortImplUnsafe<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
                 return;
             }
+            if (allocator is null)
+                allocator = ArraySortsConfig.MemoryAllocator;
             T* pivot = ptr + (count >> 1);
             Sort(ptr, pivot, comparer, allocator);
             Sort(pivot, ptrEnd, comparer, allocator);
             Merge(ptr, pivot, ptrEnd, comparer, allocator);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Merge(T* ptr, T* pivot, T* ptrEnd, IComparer<T> comparer, IMemoryAllocator allocator)
         {
@@ -35,8 +38,6 @@ namespace RiceTea.ArraySorts.Internal
             T right = *pivot;
             if (comparer.Compare(left, right) < 0)
                 return;
-            ptr = SortUtils.BinarySearchForNGI(ptr, pivot - 1, right, comparer);
-            ptrEnd = SortUtils.BinarySearchForNGI(pivot + 1, ptrEnd, left, comparer);
             long count = ptrEnd - ptr;
             if (count <= 64)
             {

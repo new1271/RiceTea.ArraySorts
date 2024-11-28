@@ -45,7 +45,7 @@ namespace RiceTea.ArraySorts.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            int count = endIndex - startIndex + 1;
+            int count = endIndex - startIndex;
             if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                 return;
             SortCore(list, startIndex, endIndex, comparer);

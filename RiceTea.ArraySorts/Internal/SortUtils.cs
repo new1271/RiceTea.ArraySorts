@@ -104,7 +104,7 @@ namespace RiceTea.ArraySorts.Internal
             {
                 case 2:
                     {
-                        T* ptr1 = ptr;
+                        T* ptr1 = ptr + 1;
                         T a = *ptr;
                         T b = *ptr1;
                         if (comparer.Compare(a, b) > 0)
