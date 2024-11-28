@@ -2,11 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
+
+#if !DEBUG
+using InlineIL;
+#endif
 
 namespace RiceTea.ArraySorts.Internal
 {
-    internal static class InsertionSortImpl
+    internal static unsafe class BinaryInsertionSortImpl
     {
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,23 +29,23 @@ namespace RiceTea.ArraySorts.Internal
                     {
                         fixed (T* ptr = array)
                         {
-                            InsertionSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer);
+                            BinaryInsertionSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer);
                         }
                     }
                     return;
 #pragma warning restore CS8500
                 }
             }
-            InsertionSortImpl<T>.Sort(list, 0, list.Count, comparer);
+            BinaryInsertionSortImpl<T>.Sort(list, 0, list.Count, comparer);
         }
     }
 
-    internal static class InsertionSortImpl<T>
+    internal static unsafe class BinaryInsertionSortImpl<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            int count = endIndex - startIndex;
+            int count = endIndex - startIndex + 1;
             if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                 return;
             SortCore(list, startIndex, endIndex, comparer);
@@ -58,25 +64,15 @@ namespace RiceTea.ArraySorts.Internal
             for (int i = startIndex + 1; i < endIndex; i++)
             {
                 T item = list[i];
-                int reverseIndex;
-                for (reverseIndex = i - 1; reverseIndex >= startIndex; reverseIndex--)
+                int placeIndex = SortUtils.BinarySearchForNGI(list, startIndex, i, item, comparer);
+                if (placeIndex == i)
+                    continue;
+                for (int j = i; j > placeIndex; j--)
                 {
-                    T itemComparing = list[reverseIndex];
-                    int replaceIndex = reverseIndex + 1;
-                    if (comparer.Compare(item, itemComparing) < 0)
-                    {
-                        list[replaceIndex] = itemComparing;
-                        continue;
-                    }
-                    if (replaceIndex == i)
-                        break;
-                    list[replaceIndex] = item;
-                    break;
+                    list[j] = list[j - 1];
                 }
-                if (reverseIndex < startIndex)
-                {
-                    list[startIndex] = item;
-                }
+                if (placeIndex < endIndex)
+                    list[placeIndex] = item;
             }
         }
     }

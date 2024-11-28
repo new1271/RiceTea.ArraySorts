@@ -4,109 +4,126 @@ using InlineMethod;
 using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Memory;
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal
 {
     internal static unsafe class MergeSortImpl
     {
+        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(T[] array, IComparer<T> comparer) where T : unmanaged
+        public static void Sort<T>(IList<T> list, IComparer<T> comparer)
         {
-            fixed (T* ptr = array)
-                MergeSortImpl<T>.Sort(ptr, ptr + array.Length, comparer);
+            if (list is T[] array)
+            {
+                Type type = typeof(T);
+                if (type.IsPrimitive || type.IsValueType)
+                {
+#pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
+                    //Do unsafe sort
+                    unsafe
+                    {
+                        fixed (T* ptr = array)
+                        {
+                            MergeSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer, ArraySortsConfig.MemoryAllocator);
+                        }
+                    }
+                    return;
+#pragma warning restore CS8500
+                }
+            }
+            MergeSortImpl<T>.Sort(list, 0, list.Count, comparer, ArraySortsConfig.MemoryAllocator);
         }
     }
 
-    internal static unsafe class MergeSortImpl<T> where T : unmanaged
+    internal static unsafe class MergeSortImpl<T>
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
+        public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
         {
-            long count = ptrEnd - ptr;
-            if (count <= 64L)
+            int count = endIndex - startIndex;
+            if (count <= 64)
             {
-                InsertionSortImpl<T>.Sort(ptr, ptrEnd, comparer);
+                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+                    return;
+                BinaryInsertionSortImpl<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
-            T* pivot = ptr + (count >> 1);
-            Sort(ptr, pivot, comparer);
-            Sort(pivot, ptrEnd, comparer);
-            Merge(ptr, pivot, ptrEnd, comparer);
-        }
-
-        [Inline(InlineBehavior.Remove)]
-        private static void Merge(T* ptr, T* pivot, T* ptrEnd, IComparer<T> comparer)
-        {
-            T left = *(pivot - 1);
-            T right = *pivot;
-            if (comparer.Compare(left, right) < 0)
-                return;
-            ptr = FindBound(ptr, pivot - 1, right, comparer);
-            ptrEnd = FindBound(pivot + 1, ptrEnd, left, comparer);
-            long count = ptrEnd - ptr;
-            if (count <= 64L)
-            {
-                InsertionSortImpl<T>.Sort(ptr, ptrEnd, comparer);
-                return;
-            }
-            uint size = unchecked((uint)(count * sizeof(T)));
-            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
-            T* space = (T*)allocator.AllocMemory(size);
-            UnsafeHelper.CopyBlock(space, ptr, size);
-            Merge(ptr, space, pivot, ptrEnd, comparer);
-            allocator.FreeMemory(space);
+            int pivotIndex = startIndex + (count >> 1);
+            Sort(list, startIndex, pivotIndex, comparer, allocator);
+            Sort(list, pivotIndex, endIndex, comparer, allocator);
+            Merge(list, startIndex, pivotIndex, endIndex, comparer, allocator);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Merge(T* ptr, T* space, T* pivot, T* ptrEnd, IComparer<T> comparer)
+        private static void Merge(IList<T> list, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
         {
-            long count = ptrEnd - ptr;
-
-            T* spacePivot = space + (count >> 1);
-            T* spaceEnd = space + count;
-
-            T* iteratorLeft = space;
-            T* iteratorRight = spacePivot;
-            T* iterator = ptr;
-
-            T left = *iteratorLeft, right = *iteratorRight;
-            for (; iterator < ptrEnd && iteratorLeft < spacePivot && iteratorRight < spaceEnd; iterator++)
+            T left = list[pivotIndex - 1];
+            T right = list[pivotIndex];
+            if (comparer.Compare(left, right) < 0)
+                return;
+            startIndex = SortUtils.BinarySearchForNGI(list, startIndex, pivotIndex - 1, right, comparer);
+            endIndex = SortUtils.BinarySearchForNGI(list, pivotIndex + 1, endIndex, left, comparer);
+            int count = endIndex - startIndex;
+            if (count <= 64)
             {
-                if (comparer.Compare(left, right) < 0)
-                {
-                    *iterator = left;
-                    left = *++iteratorLeft;
-                }
-                else
-                {
-                    *iterator = right;
-                    right = *++iteratorRight;
-                }
+                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+                    return;
+                BinaryInsertionSortImpl<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+                return;
             }
-
-            count = ptrEnd - iterator;
-            if (count > 0)
-            {
-                uint size = unchecked((uint)(count * sizeof(T)));
-                if (iteratorLeft < spacePivot)
-                    UnsafeHelper.CopyBlock(iterator, iteratorLeft, size);
-                else
-                    UnsafeHelper.CopyBlock(iterator, iteratorRight, size);
-            }
+            T[] space = allocator.AllocArray<T>(count);
+            SortUtils.CopyToArray(space, list, startIndex, 0, count);
+            Merge(list, space, startIndex, pivotIndex, endIndex, comparer);
+            allocator.FreeArray(space);
         }
 
         [Inline(InlineBehavior.Remove)]
-        private static T* FindBound(T* iterator, T* ptrEnd, T reference, IComparer<T> comparer)
+        private static void Merge(IList<T> list, T[] space, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer)
         {
-            for (; iterator < ptrEnd; iterator++)
+            int spacePivotIndex = pivotIndex - startIndex;
+            int spaceEndIndex = endIndex - startIndex;
+
+            int leftIndex = 0;
+            int rightIndex = pivotIndex - startIndex;
+            int sourceIndex = startIndex;
+
+            T left = space[leftIndex], right = space[rightIndex];
+            for (; sourceIndex < endIndex && leftIndex < spacePivotIndex && rightIndex < spaceEndIndex; sourceIndex++)
             {
-                T item = *iterator;
-                if (comparer.Compare(reference, item) < 0)
-                    return iterator;
+                if (comparer.Compare(left, right) < 0)
+                {
+                    list[sourceIndex] = left;
+                    if (++leftIndex >= spacePivotIndex)
+                    {
+                        sourceIndex++;
+                        break;
+                    }
+                    left = space[leftIndex];
+                }
+                else
+                {
+                    list[sourceIndex] = right;
+                    if (++rightIndex >= spaceEndIndex)
+                    {
+                        sourceIndex++;
+                        break;
+                    }
+                    right = space[rightIndex];
+                }
             }
-            return ptrEnd;
+
+            int count = endIndex - sourceIndex;
+            if (count > 0)
+            {
+                if (leftIndex < spacePivotIndex)
+                    SortUtils.CopyToList(list, space, leftIndex, sourceIndex, count);
+                else
+                    SortUtils.CopyToList(list, space, rightIndex, sourceIndex, count);
+            }
         }
     }
 }

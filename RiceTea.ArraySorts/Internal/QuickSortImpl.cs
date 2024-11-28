@@ -1,58 +1,90 @@
-﻿using System.Collections.Generic;
+﻿using InlineMethod;
+
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal
 {
-    internal static unsafe class QuickSortImpl
+    internal static class QuickSortImpl
     {
+        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(T[] array, IComparer<T> comparer) where T : unmanaged
+        public static void Sort<T>(IList<T> list, IComparer<T> comparer)
         {
-            fixed (T* ptr = array)
-                QuickSortImpl<T>.Sort(ptr, ptr + array.Length, comparer);
+            if (list is T[] array)
+            {
+                Type type = typeof(T);
+                if (type.IsPrimitive || type.IsValueType)
+                {
+#pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
+                    //Do unsafe sort
+                    unsafe
+                    {
+                        fixed (T* ptr = array)
+                        {
+                            QuickSortImplUnsafe<T>.Sort(ptr, ptr + array.Length, comparer);
+                        }
+                    }
+                    return;
+#pragma warning restore CS8500
+                }
+            }
+            QuickSortImpl<T>.Sort(list, 0, list.Count, comparer);
         }
     }
 
-    internal static unsafe class QuickSortImpl<T> where T : unmanaged
+    internal static class QuickSortImpl<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
+        public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            long count = ptrEnd - ptr;
-            if (count <= 64L)
-            {
-                InsertionSortImpl<T>.Sort(ptr, ptrEnd, comparer);
-                return;
-            }
-            SortInternal(ptr, ptrEnd - 1, comparer);
+            SortInternal(list, startIndex, endIndex - 1, comparer);
         }
 
+        //From https://code-maze.com/csharp-quicksort-algorithm/
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void SortInternal(T* ptrFirst, T* ptrLast, IComparer<T> comparer)
+        private static void SortInternal(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer)
         {
-            long count = ptrLast - ptrFirst - 1;
-            if (count <= 64L)
+            int count = lastIndex - startIndex + 1;
+            if (count <= 64)
             {
-                InsertionSortImpl<T>.Sort(ptrFirst, ptrLast + 1, comparer);
+                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+                    return;
+                BinaryInsertionSortImpl<T>.Sort(list, startIndex, lastIndex + 1, comparer);
                 return;
             }
-            if (ptrFirst >= ptrLast)
-                return;
-            T pivot = *(ptrFirst + (ptrLast - ptrFirst) / 2);
-            T* leftPointer = ptrFirst - 1;
-            T* rightPointer = ptrLast + 1;
-            while (true)
+
+            int leftIndex = startIndex;
+            int rightIndex = lastIndex;
+
+            T pivot = list[startIndex];
+
+            while (leftIndex <= rightIndex)
             {
-                while (comparer.Compare(*++leftPointer, pivot) < 0) ;
-                while (comparer.Compare(*--rightPointer, pivot) > 0) ;
-                if (leftPointer >= rightPointer)
-                    break;
-                T temp = *leftPointer;
-                *leftPointer = *rightPointer;
-                *rightPointer = temp;
+                while (comparer.Compare(list[leftIndex], pivot) < 0)
+                {
+                    leftIndex++;
+                }
+
+                while (comparer.Compare(list[rightIndex], pivot) > 0)
+                {
+                    rightIndex--;
+                }
+
+                if (leftIndex <= rightIndex)
+                {
+                    (list[rightIndex], list[leftIndex]) = (list[leftIndex], list[rightIndex]);
+                    leftIndex++;
+                    rightIndex--;
+                }
             }
-            SortInternal(ptrFirst, rightPointer, comparer);
-            SortInternal(rightPointer + 1, ptrLast, comparer);
+
+            if (startIndex < rightIndex)
+                SortInternal(list, startIndex, rightIndex, comparer);
+
+            if (leftIndex < lastIndex)
+                SortInternal(list, leftIndex, lastIndex, comparer);
         }
     }
 }
