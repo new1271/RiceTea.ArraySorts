@@ -13,14 +13,6 @@ namespace RiceTea.ArraySorts
     public static class ArraySorts
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void QuickSort<T>(IList<T> list, IComparer<T> comparer = null)
-        {
-            if (list is null || list.Count <= 0)
-                return;
-            QuickSortImpl.Sort(list, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BinaryInsertionSort<T>(IList<T> list, IComparer<T> comparer = null)
         {
             if (list is null || list.Count <= 0)
