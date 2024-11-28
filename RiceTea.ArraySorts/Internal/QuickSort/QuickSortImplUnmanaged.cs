@@ -5,7 +5,7 @@ using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 namespace RiceTea.ArraySorts.Internal.QuickSort
 {
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
-    internal static unsafe class QuickSortImplUnsafe<T>
+    internal static unsafe class QuickSortImplUnmanaged<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)

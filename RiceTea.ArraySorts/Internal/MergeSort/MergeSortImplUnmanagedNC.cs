@@ -24,7 +24,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             long count = ptrEnd - ptr;
             if (count <= 64)
             {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count))
+                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
                     return;
                 BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
                 return;
@@ -46,7 +46,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             long count = ptrEnd - ptr;
             if (count <= 64)
             {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count))
+                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
                     return;
                 BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
                 return;

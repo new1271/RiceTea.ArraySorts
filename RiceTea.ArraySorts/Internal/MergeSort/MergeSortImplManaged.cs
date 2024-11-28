@@ -50,7 +50,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 return;
             }
             T[] space = allocator.AllocArray<T>(count);
-            SortUtils.CopyToArray(space, list, startIndex, 0, count);
+            MemoryUtils.CopyToArray(space, list, startIndex, 0, count);
             Merge(list, space, startIndex, pivotIndex, endIndex, comparer);
             allocator.FreeArray(space);
         }
@@ -94,9 +94,9 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (count > 0)
             {
                 if (leftIndex < spacePivotIndex)
-                    SortUtils.CopyToList(list, space, leftIndex, sourceIndex, count);
+                    MemoryUtils.CopyToList(list, space, leftIndex, sourceIndex, count);
                 else
-                    SortUtils.CopyToList(list, space, rightIndex, sourceIndex, count);
+                    MemoryUtils.CopyToList(list, space, rightIndex, sourceIndex, count);
             }
         }
     }

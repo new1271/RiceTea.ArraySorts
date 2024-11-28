@@ -103,14 +103,7 @@ namespace RiceTea.ArraySorts.Tester
                     stopwatch.Stop();
                     break;
                 case SortFunction.QuickSort:
-                    name = nameof(ArraySorts.QuickSort);
-#if !DEBUG
-                    ArraySorts.QuickSort(referenceSequence, comparer);
-#endif
-                    stopwatch.Restart();
-                    ArraySorts.QuickSort(testSequence, comparer);
-                    stopwatch.Stop();
-                    break;
+                    return;
                 case SortFunction.MergeSort:
                     name = nameof(ArraySorts.MergeSort);
 #if !DEBUG

@@ -13,7 +13,7 @@ namespace RiceTea.ArraySorts.Internal.InsertionSort
         public static void Sort(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count < 2 || SortUtils.ShortCircuitSort(ptr, count))
+            if (count < 2 || SortUtils.ShortCircuitSortNC(ptr, count))
                 return;
             SortCore(ptr, ptrEnd);
         }

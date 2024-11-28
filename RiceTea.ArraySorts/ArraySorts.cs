@@ -1,73 +1,37 @@
-﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System;
+﻿using InlineMethod;
+
 using RiceTea.ArraySorts.Internal;
+
+using System;
 using System.Collections;
-using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
-using RiceTea.ArraySorts.Internal.InsertionSort;
-using RiceTea.ArraySorts.Internal.MergeSort;
-using RiceTea.ArraySorts.Internal.QuickSort;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts
 {
-    public static class ArraySorts
+    public static partial class ArraySorts
     {
+        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void BinaryInsertionSort<T>(IList<T> list, IComparer<T> comparer = null)
+        private static void CheckArguments<T>(IList<T> list, int index, int count)
         {
-            if (list is null || list.Count <= 0)
-                return;
-            BinaryInsertionSortImpl.Sort(list, comparer);
+            if (list is null)
+                throw new ArgumentNullException(nameof(list));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), $"'{nameof(index)}' is less than zero.");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), $"'{nameof(count)}' is less than zero.");
+            if (list.Count - index < count)
+                throw new ArgumentException($"'{nameof(index)}' and '{nameof(count)}' do not specify a valid range in '{nameof(list)}'.");
         }
 
+        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void InsertionSort<T>(IList<T> list, IComparer<T> comparer = null)
+        private static int CheckArgumentsAndReturnCount<T>(IList<T> list)
         {
-            if (list is null || list.Count <= 0)
-                return;
-            InsertionSortImpl.Sort(list, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void MergeSort<T>(IList<T> list, IComparer<T> comparer = null)
-        {
-            if (list is null || list.Count <= 0)
-                return;
-            MergeSortImpl.Sort(list, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void IntroSort<T>(IList<T> list, IComparer<T> comparer = null)
-        {
-            if (list is null || list.Count <= 0)
-                return;
-            switch (list)
-            {
-                case T[] array:
-                    Array.Sort(array, comparer);
-                    return;
-                case List<T> _list:
-                    _list.Sort(comparer);
-                    return;
-                case IList _list:
-                    {
-                        ArrayList arrayList = ArrayList.Adapter(_list);
-                        if (comparer is null)
-                        {
-                            arrayList.Sort();
-                            return;
-                        }
-                        if (comparer is IComparer objectComparer)
-                        {
-                            arrayList.Sort(objectComparer);
-                            return;
-                        }
-                        arrayList.Sort(new GenericComparerWrapper<T>(comparer));
-                    }
-                    return;
-                default:
-                    throw new NotSupportedException();
-            }
+            if (list is null)
+                throw new ArgumentNullException(nameof(list));
+            return list.Count;
         }
     }
 }
