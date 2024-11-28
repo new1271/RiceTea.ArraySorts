@@ -14,4 +14,10 @@
 	  <ProjectReference Include="..\RiceTea.ArraySorts\RiceTea.ArraySorts.csproj" />
 	</ItemGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<AllowedReferenceRelatedFileExtensions>
+			-
+		</AllowedReferenceRelatedFileExtensions>
+	</PropertyGroup>
+
 </Project>

@@ -1,14 +1,14 @@
 ﻿using InlineMethod;
 
-using RiceTea.ArraySorts.Internal;
-
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts
 {
+    /// <summary>
+    /// Sorts the elements in <see cref="IList{T}" /> with sorting algorithms.
+    /// </summary>
     public static partial class ArraySorts
     {
         [Inline(InlineBehavior.Remove)]
