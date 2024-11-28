@@ -2,6 +2,7 @@
 
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -41,7 +42,7 @@ namespace RiceTea.ArraySorts
         /// <param name="index">The starting index of the range to sort.</param>
         /// <param name="count">The number of elements in the range to sort.</param>
         /// <param name="comparer">The <see cref=" IComparer{T}"/> generic interface implementation to use when comparing elements, <br/>
-        /// or <see cref="null"/> to use the <see cref="IComparable{T}"/> generic interface implementation of each element.</param>
+        /// or <see langword="null"/> to use the <see cref="IComparable{T}"/> generic interface implementation of each element.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BinaryInsertionSort<T>(IList<T> list, int index, int count, IComparer<T> comparer)
         {
