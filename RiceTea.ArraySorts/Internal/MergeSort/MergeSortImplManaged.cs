@@ -11,14 +11,14 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
 {
     internal static unsafe class MergeSortImplManaged<T>
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             SortCore(list, startIndex, endIndex, comparer, ArraySortsConfig.DefaultMemoryAllocator);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
+        private static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
         {
             int count = endIndex - startIndex;
             if (count <= 64)
@@ -34,7 +34,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             Merge(list, startIndex, pivotIndex, endIndex, comparer, allocator);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Inline(InlineBehavior.Remove)]
         private static void Merge(IList<T> list, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
         {
             T left = list[pivotIndex - 1];

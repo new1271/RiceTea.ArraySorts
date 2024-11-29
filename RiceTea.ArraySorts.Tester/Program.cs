@@ -48,6 +48,8 @@ namespace RiceTea.ArraySorts.Tester
 
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, arrayCloneFunction);
             GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.QuickSort, arrayCloneFunction);
+            GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.MergeSort, arrayCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.BinaryInsertionSort, arrayCloneFunction);
@@ -59,6 +61,8 @@ namespace RiceTea.ArraySorts.Tester
             Console.WriteLine("List<T> form:");
 
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, listCloneFunction);
+            GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.QuickSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.MergeSort, listCloneFunction);
             GC.Collect();
@@ -103,7 +107,14 @@ namespace RiceTea.ArraySorts.Tester
                     stopwatch.Stop();
                     break;
                 case SortFunction.QuickSort:
-                    return;
+                    name = nameof(ArraySorts.QuickSort);
+#if !DEBUG
+                    ArraySorts.QuickSort(referenceSequence, comparer);
+#endif
+                    stopwatch.Restart();
+                    ArraySorts.QuickSort(testSequence, comparer);
+                    stopwatch.Stop();
+                    break;
                 case SortFunction.MergeSort:
                     name = nameof(ArraySorts.MergeSort);
 #if !DEBUG

@@ -1,4 +1,5 @@
 ﻿using InlineMethod;
+
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Internal.MergeSort;
 
@@ -18,13 +19,28 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
             if (list is T[] array)
             {
                 Type type = typeof(T);
-                if (type.IsPrimitive || type.IsValueType)
+                if (type.IsPrimitive)
                 {
                     fixed (T* ptr = array)
                     {
                         T* ptrStart = ptr + index;
                         T* ptrEnd = ptr + index + count;
+                        if (comparer is null || comparer == Comparer<T>.Default)
+                        {
+                            QuickSortImplUnmanagedNC<T>.Sort(ptrStart, ptrEnd);
+                            return;
+                        }
                         QuickSortImplUnmanaged<T>.Sort(ptrStart, ptrEnd, comparer);
+                    }
+                    return;
+                }
+                if (type.IsValueType)
+                {
+                    fixed (T* ptr = array)
+                    {
+                        T* ptrStart = ptr + index;
+                        T* ptrEnd = ptr + index + count;
+                        QuickSortImplUnmanaged<T>.Sort(ptrStart, ptrEnd, comparer ?? Comparer<T>.Default);
                     }
                     return;
                 }

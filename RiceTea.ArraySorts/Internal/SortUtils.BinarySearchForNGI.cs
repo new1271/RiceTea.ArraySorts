@@ -35,11 +35,10 @@ namespace RiceTea.ArraySorts.Internal
                 return ptr;
             }
             T* ptrMiddle = ptr + ((count - 1) >> 1);
-            PackedPrimitive<T> packedItem = item;
-            PackedPrimitive<T> packedMiddle = *ptrMiddle;
-            if (packedItem == packedMiddle)
+            int compare = new PackedPrimitive<T>(item).CompareTo(*ptrMiddle);
+            if (compare == 0)
                 return ptrMiddle + 1;
-            if (packedItem > packedMiddle)
+            if (compare > 0)
             {
 #if DEBUG
                 return BinarySearchForNGI(ptrMiddle + 1, ptrEnd, item);

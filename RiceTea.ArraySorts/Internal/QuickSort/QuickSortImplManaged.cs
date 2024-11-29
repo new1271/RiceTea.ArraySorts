@@ -1,4 +1,8 @@
-﻿using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
+﻿using InlineMethod;
+
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
+using RiceTea.ArraySorts.Internal.InsertionSort;
+using RiceTea.ArraySorts.Internal.MergeSort;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -10,13 +14,27 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            SortInternal(list, startIndex, endIndex - 1, comparer);
+            int count = endIndex - startIndex;
+            if (count <= 64)
+            {
+                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+                    return;
+                BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, endIndex, comparer);
+                return;
+            }
+            SortCore(list, startIndex, endIndex - 1, comparer, 0);
+            InsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
         }
 
         //From https://code-maze.com/csharp-quicksort-algorithm/
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void SortInternal(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer)
+        private static void SortInternal(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer, int depth)
         {
+            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
+            {
+                MergeSortImplManaged<T>.Sort(list, startIndex, lastIndex + 1, comparer);
+                return;
+            }
             int count = lastIndex - startIndex + 1;
             if (count <= 64)
             {
@@ -25,7 +43,13 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, lastIndex + 1, comparer);
                 return;
             }
+            SortCore(list, startIndex, lastIndex, comparer, depth);
+        }
 
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer, int depth)
+        {
             int leftIndex = startIndex;
             int rightIndex = lastIndex;
 
@@ -52,10 +76,10 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
             }
 
             if (startIndex < rightIndex)
-                SortInternal(list, startIndex, rightIndex, comparer);
+                SortInternal(list, startIndex, rightIndex, comparer, depth + 1);
 
             if (leftIndex < lastIndex)
-                SortInternal(list, leftIndex, lastIndex, comparer);
+                SortInternal(list, leftIndex, lastIndex, comparer, depth + 1);
         }
     }
 }
