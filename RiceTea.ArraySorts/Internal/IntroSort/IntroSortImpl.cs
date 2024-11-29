@@ -11,12 +11,19 @@ namespace RiceTea.ArraySorts.Internal.IntroSort
     {
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Sort<T>(T[] array, int index, int count, IComparer<T> comparer) //Use CLR default implementation
+        {
+            Array.Sort(array, index, count, comparer);
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(IList<T> list, int index, int count, IComparer<T> comparer) //Use CLR default implementation
         {
             switch (list)
             {
                 case T[] array:
-                    Array.Sort(array, index, count, comparer);
+                    Sort(array, index, count, comparer);
                     return;
                 case List<T> _list:
                     _list.Sort(index, count, comparer);
