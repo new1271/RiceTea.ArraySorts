@@ -15,7 +15,7 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 64)
+            if (count <= 16)
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;
@@ -36,7 +36,7 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 return;
             }
             int count = lastIndex - startIndex + 1;
-            if (count <= 64)
+            if (count <= 16)
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;

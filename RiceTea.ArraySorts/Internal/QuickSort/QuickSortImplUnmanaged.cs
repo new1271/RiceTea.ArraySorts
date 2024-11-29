@@ -16,7 +16,7 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 64L)
+            if (count <= 16L)
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
                     return;
@@ -37,7 +37,7 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 return;
             }
             long count = ptrLast - ptrStart + 1;
-            if (count <= 64L)
+            if (count <= 16L)
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptrStart, count, comparer))
                     return;

@@ -47,7 +47,7 @@ namespace RiceTea.ArraySorts
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BinaryInsertionSort<T>(T[] array, Comparison<T> comparison)
         {
-            int length = CheckArgumentsAndReturnLength(array);
+            int length = CheckArgumentsAndReturnLength(array, comparison);
             BinaryInsertionSortCore(array, 0, length, Comparer<T>.Create(comparison));
         }
 

@@ -100,7 +100,8 @@ namespace RiceTea.ArraySorts.Tester
                 case SortFunction.IntroSort:
                     name = nameof(ArraySorts.IntroSort);
 #if !DEBUG
-                    ArraySorts.IntroSort(referenceSequence, comparer);
+                    ArraySorts.IntroSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
 #endif
                     stopwatch.Restart();
                     ArraySorts.IntroSort(testSequence, comparer);
@@ -109,7 +110,8 @@ namespace RiceTea.ArraySorts.Tester
                 case SortFunction.QuickSort:
                     name = nameof(ArraySorts.QuickSort);
 #if !DEBUG
-                    ArraySorts.QuickSort(referenceSequence, comparer);
+                    ArraySorts.QuickSort(testSequence, comparer); 
+                    testSequence = cloneFunction.Invoke(sequence);
 #endif
                     stopwatch.Restart();
                     ArraySorts.QuickSort(testSequence, comparer);
@@ -118,7 +120,8 @@ namespace RiceTea.ArraySorts.Tester
                 case SortFunction.MergeSort:
                     name = nameof(ArraySorts.MergeSort);
 #if !DEBUG
-                    ArraySorts.MergeSort(referenceSequence, comparer);
+                    ArraySorts.MergeSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
 #endif
                     stopwatch.Restart();
                     ArraySorts.MergeSort(testSequence, comparer);

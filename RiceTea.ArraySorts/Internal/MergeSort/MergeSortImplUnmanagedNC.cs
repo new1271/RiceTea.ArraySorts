@@ -22,7 +22,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         private static void SortCore(T* ptr, T* ptrEnd, IMemoryAllocator allocator)
         {
             long count = ptrEnd - ptr;
-            if (count <= 64)
+            if (count <= 16)
             {
                 if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
                     return;
@@ -44,7 +44,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (new PackedPrimitive<T>(left) < right)
                 return;
             long count = ptrEnd - ptr;
-            if (count <= 64)
+            if (count <= 16)
             {
                 if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
                     return;
