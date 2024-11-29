@@ -145,7 +145,7 @@ namespace RiceTea.ArraySorts.Tester
                 default:
                     throw new NotImplementedException();
             }
-            Console.WriteLine(name + "() spends " + stopwatch.ElapsedMilliseconds.ToString() + "." +
+            Console.WriteLine(name + "() spent " + stopwatch.ElapsedMilliseconds.ToString() + "." +
                 (stopwatch.ElapsedTicks % TimeSpan.TicksPerMillisecond).ToString("0000") + " ms to sort the sequence!");
             Console.WriteLine("checking...");
             for (int i = 0, length = referenceSequence.Length; i < length; i++)

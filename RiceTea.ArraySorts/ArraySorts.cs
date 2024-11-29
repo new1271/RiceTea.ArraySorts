@@ -33,5 +33,16 @@ namespace RiceTea.ArraySorts
                 throw new ArgumentNullException(nameof(list));
             return list.Count;
         }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int CheckArgumentsAndReturnCount<T>(IList<T> list, Comparison<T> comparison)
+        {
+            if (list is null)
+                throw new ArgumentNullException(nameof(list));
+            if (comparison is null)
+                throw new ArgumentNullException(nameof(comparison));
+            return list.Count;
+        }
     }
 }

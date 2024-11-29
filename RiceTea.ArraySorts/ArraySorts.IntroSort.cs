@@ -1,9 +1,8 @@
 ﻿using InlineMethod;
 
-using RiceTea.ArraySorts.Internal;
+using RiceTea.ArraySorts.Internal.IntroSort;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -11,7 +10,11 @@ namespace RiceTea.ArraySorts
 {
     partial class ArraySorts
     {
-        /// <inheritdoc cref="IntroSort{T}(IList{T}, int, int, IComparer{T})"/>
+        /// <summary>
+        /// Sorts the elements with IntroSort algorithm in an entire <see cref="IList{T}" /> using the <see cref="IComparable{T}"/> generic interface implementation of each element of the <see cref="IList{T}" />.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
+        /// <param name="list">The list to sort.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void IntroSort<T>(IList<T> list)
         {
@@ -19,7 +22,13 @@ namespace RiceTea.ArraySorts
             IntroSortCore(list, 0, count, null);
         }
 
-        /// <inheritdoc cref="IntroSort{T}(IList{T}, int, int, IComparer{T})"/>
+        /// <summary>
+        /// Sorts the elements with IntroSort algorithm in an <see cref="IList{T}" /> using the specified <see cref="IComparer{T}"/> generic interface.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
+        /// <param name="list">The list to sort.</param>
+        /// <param name="comparer">The <see cref=" IComparer{T}"/> generic interface implementation to use when comparing elements, <br/>
+        /// or <see langword="null"/> to use the <see cref="IComparable{T}"/> generic interface implementation of each element.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void IntroSort<T>(IList<T> list, IComparer<T> comparer)
         {
@@ -27,7 +36,26 @@ namespace RiceTea.ArraySorts
             IntroSortCore(list, 0, count, comparer);
         }
 
-        /// <inheritdoc cref="IntroSort{T}(IList{T}, int, int, IComparer{T})"/>
+        /// <summary>
+        /// Sorts the elements with IntroSort algorithm in an <see cref="IList{T}" /> using the specified <see cref="Comparison{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
+        /// <param name="list">The list to sort.</param>
+        /// <param name="comparison">The <see cref="Comparison{T}"/> to use when comparing elements.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void IntroSort<T>(IList<T> list, Comparison<T> comparison)
+        {
+            int count = CheckArgumentsAndReturnCount(list, comparison);
+            IntroSortCore(list, 0, count, Comparer<T>.Create(comparison));
+        }
+
+        /// <summary>
+        /// Sorts the elements in a range of elements in an <see cref="IList{T}" /> using the <see cref="IComparable{T}"/> generic interface implementation of each element of the <see cref="IList{T}" />.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
+        /// <param name="list">The list to sort.</param>
+        /// <param name="index">The starting index of the range to sort.</param>
+        /// <param name="count">The number of elements in the range to sort.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void IntroSort<T>(IList<T> list, int index, int count)
         {
@@ -36,9 +64,9 @@ namespace RiceTea.ArraySorts
         }
 
         /// <summary>
-        /// Sorts the elements in <see cref="IList{T}" /> with IntroSort algorithm.
+        /// Sorts the elements in a range of elements in an <see cref="IList{T}" /> using the specified <see cref="IComparer{T}"/> generic interface.
         /// </summary>
-        /// <typeparam name="T">The type of the elements of the array.</typeparam>
+        /// <typeparam name="T">The type of the elements of the list.</typeparam>
         /// <param name="list">The list to sort.</param>
         /// <param name="index">The starting index of the range to sort.</param>
         /// <param name="count">The number of elements in the range to sort.</param>
@@ -57,33 +85,7 @@ namespace RiceTea.ArraySorts
         {
             if (count <= 0)
                 return;
-            switch (list)
-            {
-                case T[] array:
-                    Array.Sort(array, index, count, comparer);
-                    return;
-                case List<T> _list:
-                    _list.Sort(index, count, comparer);
-                    return;
-                case IList _list:
-                    {
-                        ArrayList arrayList = ArrayList.Adapter(_list);
-                        if (comparer is null)
-                        {
-                            arrayList.Sort(index, count, null);
-                            return;
-                        }
-                        if (comparer is IComparer objectComparer)
-                        {
-                            arrayList.Sort(index, count, objectComparer);
-                            return;
-                        }
-                        arrayList.Sort(index, count, new GenericComparerWrapper<T>(comparer));
-                    }
-                    return;
-                default:
-                    throw new NotSupportedException();
-            }
+            IntroSortImpl.Sort(list, index, count, comparer);
         }
     }
 }
