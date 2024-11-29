@@ -1,5 +1,6 @@
 ﻿
 using InlineMethod;
+
 using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
@@ -15,11 +16,22 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(T* ptr, T* ptrEnd)
         {
-            SortCore(ptr, ptrEnd, ArraySortsConfig.MemoryAllocator);
+            long count = ptrEnd - ptr;
+            if (count <= 16)
+            {
+                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
+                    return;
+                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+                return;
+            }
+            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
+            T* space = (T*)allocator.AllocMemory(unchecked((uint)(count * sizeof(T))));
+            SortCore(ptr, ptrEnd, space, count);
+            allocator.FreeMemory(space);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void SortCore(T* ptr, T* ptrEnd, IMemoryAllocator allocator)
+        private static void SortInternal(T* ptr, T* ptrEnd, T* space)
         {
             long count = ptrEnd - ptr;
             if (count <= 16)
@@ -29,15 +41,21 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
                 return;
             }
-            T* pivot = ptr + (count >> 1);
-            SortCore(ptr, pivot, allocator);
-            SortCore(pivot, ptrEnd, allocator);
-            Merge(ptr, pivot, ptrEnd, allocator);
+            SortCore(ptr, ptrEnd, space, count);
         }
 
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(T* ptr, T* ptrEnd, T* space, long count)
+        {
+            T* pivot = ptr + (count >> 1);
+            SortInternal(ptr, pivot, space);
+            SortInternal(pivot, ptrEnd, space);
+            Merge(ptr, pivot, ptrEnd, space);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Merge(T* ptr, T* pivot, T* ptrEnd, IMemoryAllocator allocator)
+        private static void Merge(T* ptr, T* pivot, T* ptrEnd, T* space)
         {
             T left = *(pivot - 1);
             T right = *pivot;
@@ -51,16 +69,13 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
                 return;
             }
-            uint size = unchecked((uint)(count * sizeof(T)));
-            T* space = (T*)allocator.AllocMemory(size);
-            UnsafeHelper.CopyBlock(space, ptr, size);
-            Merge(ptr, pivot, ptrEnd, space);
-            allocator.FreeMemory(space);
+            UnsafeHelper.CopyBlock(space, ptr, unchecked((uint)(count * sizeof(T))));
+            MergeCore(ptr, pivot, ptrEnd, space);
         }
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Merge(T* ptr, T* pivot, T* ptrEnd, T* space)
+        private static void MergeCore(T* ptr, T* pivot, T* ptrEnd, T* space)
         {
             T* spacePivot = space + (pivot - ptr);
             T* spaceEnd = space + (ptrEnd - ptr);

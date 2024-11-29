@@ -1,5 +1,6 @@
 ﻿
 using InlineMethod;
+
 using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
@@ -14,11 +15,22 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            SortCore(list, startIndex, endIndex, comparer, ArraySortsConfig.DefaultMemoryAllocator);
+            int count = endIndex - startIndex;
+            if (count <= 16)
+            {
+                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+                    return;
+                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+                return;
+            }
+            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
+            T[] space = allocator.AllocArray<T>(count);
+            SortCore(list, space, startIndex, endIndex, count, comparer);
+            allocator.FreeArray(space);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
+        private static void SortInternal(IList<T> list, T[] space, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
             if (count <= 16)
@@ -28,14 +40,21 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
-            int pivotIndex = startIndex + (count >> 1);
-            SortCore(list, startIndex, pivotIndex, comparer, allocator);
-            SortCore(list, pivotIndex, endIndex, comparer, allocator);
-            Merge(list, startIndex, pivotIndex, endIndex, comparer, allocator);
+            SortCore(list, space, startIndex, endIndex, count, comparer);
         }
 
         [Inline(InlineBehavior.Remove)]
-        private static void Merge(IList<T> list, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer, IMemoryAllocator allocator)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(IList<T> list, T[] space, int startIndex, int endIndex, int count, IComparer<T> comparer)
+        {
+            int pivotIndex = startIndex + (count >> 1);
+            SortInternal(list, space, startIndex, pivotIndex, comparer);
+            SortInternal(list, space, pivotIndex, endIndex, comparer);
+            Merge(list, space, startIndex, pivotIndex, endIndex, comparer);
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        private static void Merge(IList<T> list, T[] space, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer)
         {
             T left = list[pivotIndex - 1];
             T right = list[pivotIndex];
@@ -49,14 +68,12 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
                 return;
             }
-            T[] space = allocator.AllocArray<T>(count);
             MemoryUtils.CopyToArray(space, list, startIndex, 0, count);
-            Merge(list, space, startIndex, pivotIndex, endIndex, comparer);
-            allocator.FreeArray(space);
+            MergeCore(list, space, startIndex, pivotIndex, endIndex, comparer);
         }
 
         [Inline(InlineBehavior.Remove)]
-        private static void Merge(IList<T> list, T[] space, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer)
+        private static void MergeCore(IList<T> list, T[] space, int startIndex, int pivotIndex, int endIndex, IComparer<T> comparer)
         {
             int spacePivotIndex = pivotIndex - startIndex;
             int spaceEndIndex = endIndex - startIndex;
