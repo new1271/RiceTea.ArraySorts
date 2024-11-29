@@ -22,7 +22,7 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, endIndex, comparer);
                 return;
             }
-            SortCore(list, startIndex, endIndex - 1, comparer, Intr);
+            SortCore(list, startIndex, endIndex - 1, comparer, 0);
             InsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
         }
 
