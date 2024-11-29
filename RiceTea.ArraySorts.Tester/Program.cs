@@ -15,8 +15,10 @@ namespace RiceTea.ArraySorts.Tester
             IntroSort,
             QuickSort,
             MergeSort,
+            InPlaceMergeSort,
             InsertionSort,
             BinaryInsertionSort,
+            ShellSort,
         }
 
         public static void Main(string[] args)
@@ -35,8 +37,8 @@ namespace RiceTea.ArraySorts.Tester
 
             referenceSequence = sequence.Clone() as int[];
 
-            //Array.Reverse(sequence);
-            Shuffle(sequence);
+            Array.Reverse(sequence);
+            //Shuffle(sequence);
 
             Func<int[], int[]> arrayCloneFunction = new Func<int[], int[]>(arr => arr.Clone() as int[]);
             Func<int[], List<int>> listCloneFunction = new Func<int[], List<int>>(arr => new List<int>(arr));
@@ -52,6 +54,10 @@ namespace RiceTea.ArraySorts.Tester
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.MergeSort, arrayCloneFunction);
             GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.InPlaceMergeSort, arrayCloneFunction);
+            GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.ShellSort, arrayCloneFunction);
+            GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.BinaryInsertionSort, arrayCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.InsertionSort, arrayCloneFunction);
@@ -65,6 +71,10 @@ namespace RiceTea.ArraySorts.Tester
             DoTest(sequence, referenceSequence, SortFunction.QuickSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.MergeSort, listCloneFunction);
+            GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.InPlaceMergeSort, listCloneFunction);
+            GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.ShellSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.BinaryInsertionSort, listCloneFunction);
             GC.Collect();
@@ -126,11 +136,22 @@ namespace RiceTea.ArraySorts.Tester
                     stopwatch.Restart();
                     ArraySorts.MergeSort(testSequence, comparer);
                     stopwatch.Stop();
+                    break;              
+                case SortFunction.InPlaceMergeSort:
+                    name = nameof(ArraySorts.InPlaceMergeSort);
+#if !DEBUG
+                    ArraySorts.InPlaceMergeSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
+#endif
+                    stopwatch.Restart();
+                    ArraySorts.InPlaceMergeSort(testSequence, comparer);
+                    stopwatch.Stop();
                     break;
                 case SortFunction.InsertionSort:
                     name = nameof(ArraySorts.InsertionSort);
 #if !DEBUG
-                    ArraySorts.InsertionSort(referenceSequence, comparer);
+                    ArraySorts.InsertionSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
 #endif
                     stopwatch.Restart();
                     ArraySorts.InsertionSort(testSequence, comparer);
@@ -139,10 +160,21 @@ namespace RiceTea.ArraySorts.Tester
                 case SortFunction.BinaryInsertionSort:
                     name = nameof(ArraySorts.BinaryInsertionSort);
 #if !DEBUG
-                    ArraySorts.BinaryInsertionSort(referenceSequence, comparer);
+                    ArraySorts.BinaryInsertionSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
 #endif
                     stopwatch.Restart();
                     ArraySorts.BinaryInsertionSort(testSequence, comparer);
+                    stopwatch.Stop();
+                    break;
+                case SortFunction.ShellSort:
+                    name = nameof(ArraySorts.ShellSort);
+#if !DEBUG
+                    ArraySorts.ShellSort(testSequence, comparer);
+                    testSequence = cloneFunction.Invoke(sequence);
+#endif
+                    stopwatch.Restart();
+                    ArraySorts.ShellSort(testSequence, comparer);
                     stopwatch.Stop();
                     break;
                 default:

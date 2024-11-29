@@ -22,25 +22,24 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, endIndex, comparer);
                 return;
             }
-            SortCore(list, startIndex, endIndex - 1, comparer, 0);
+            SortCore(list, startIndex, endIndex - 1, comparer, Intr);
             InsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
         }
 
-        //From https://code-maze.com/csharp-quicksort-algorithm/
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void SortInternal(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer, int depth)
         {
-            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
-            {
-                MergeSortImplManaged<T>.Sort(list, startIndex, lastIndex + 1, comparer);
-                return;
-            }
             int count = lastIndex - startIndex + 1;
             if (count <= 16)
             {
                 if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                     return;
                 BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, lastIndex + 1, comparer);
+                return;
+            }
+            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
+            {
+                MergeSortImplManaged<T>.SortWithoutCheck(list, startIndex, lastIndex + 1, count, comparer);
                 return;
             }
             SortCore(list, startIndex, lastIndex, comparer, depth);

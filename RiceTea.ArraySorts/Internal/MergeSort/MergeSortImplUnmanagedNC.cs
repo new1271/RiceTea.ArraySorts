@@ -24,10 +24,13 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
                 return;
             }
-            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
-            T* space = (T*)allocator.AllocMemory(unchecked((uint)(count * sizeof(T))));
-            SortCore(ptr, ptrEnd, space, count);
-            allocator.FreeMemory(space);
+            SortCore(ptr, ptrEnd, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(T* ptr, T* ptrEnd, long count)
+        {
+            SortCore(ptr, ptrEnd, count);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -42,6 +45,16 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
                 return;
             }
             SortCore(ptr, ptrEnd, space, count);
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(T* ptr, T* ptrEnd, long count)
+        {
+            IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
+            T* space = (T*)allocator.AllocMemory(unchecked((uint)(count * sizeof(T))));
+            SortCore(ptr, ptrEnd, space, count);
+            allocator.FreeMemory(space);
         }
 
         [Inline(InlineBehavior.Remove)]

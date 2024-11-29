@@ -1,6 +1,5 @@
 ﻿using InlineMethod;
 
-using RiceTea.ArraySorts.Internal.IntroSort;
 using RiceTea.ArraySorts.Internal.MergeSort;
 
 using System;

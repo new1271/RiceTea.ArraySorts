@@ -31,17 +31,17 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void SortInternal(T* ptrStart, T* ptrLast, IComparer<T> comparer, int depth)
         {
-            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
-            {
-                MergeSortImplUnmanaged<T>.Sort(ptrStart, ptrLast + 1, comparer);
-                return;
-            }
             long count = ptrLast - ptrStart + 1;
             if (count <= 16L)
             {
                 if (count < 2L || SortUtils.ShortCircuitSort(ptrStart, count, comparer))
                     return;
                 BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptrStart, ptrLast + 1, comparer);
+                return;
+            }
+            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
+            {
+                MergeSortImplUnmanaged<T>.SortWithoutCheck(ptrStart, ptrLast + 1, count, comparer);
                 return;
             }
             SortCore(ptrStart, ptrLast, comparer, depth);

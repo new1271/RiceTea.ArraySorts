@@ -1,6 +1,5 @@
 ﻿using InlineMethod;
 
-using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Internal.InsertionSort;
 
 using System;
