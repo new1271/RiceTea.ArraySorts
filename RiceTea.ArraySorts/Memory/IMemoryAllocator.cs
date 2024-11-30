@@ -1,4 +1,6 @@
-﻿namespace RiceTea.ArraySorts.Memory
+﻿using System;
+
+namespace RiceTea.ArraySorts.Memory
 {
     /// <summary>
     /// An interface used to allocate memory block or array if algorithm needed.
@@ -10,12 +12,12 @@
         /// </summary>
         /// <param name="size">The size of the memory block (in bytes)</param>
         /// <returns>A pointer pointed to memory block allocated</returns>
-        void* AllocMemory(uint size);
+        void* AllocMemory(IntPtr size);
 
         /// <summary>
         /// Frees the memory block allocated
         /// </summary>
-        /// <param name="ptr">The pointer from <see cref="AllocMemory(uint)"/> call</param>
+        /// <param name="ptr">The pointer from <see cref="AllocMemory(IntPtr)"/> call</param>
         void FreeMemory(void* ptr);
 
         /// <summary>

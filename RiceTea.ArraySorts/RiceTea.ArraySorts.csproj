@@ -7,7 +7,6 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Deterministic>True</Deterministic>
 		<Platforms>AnyCPU;x64</Platforms>
-		<LangVersion>latest</LangVersion>
 		<Authors>RiceTea</Authors>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageProjectUrl>https://github.com/new1271/RiceTea.ArraySorts</PackageProjectUrl>

@@ -1,5 +1,6 @@
 ﻿using RiceTea.ArraySorts.Memory;
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Config
@@ -15,7 +16,31 @@ namespace RiceTea.ArraySorts.Config
 
         static ArraySortsConfig()
         {
-            DefaultMemoryAllocator allocator = new DefaultMemoryAllocator();
+            IMemoryAllocator allocator;
+#if NET5_0_OR_GREATER
+            if (OperatingSystem.IsWindows())
+                allocator = new Win32DefaultMemoryAllocator();
+            else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                allocator = new UnixDefaultMemoryAllocator();
+            else
+                allocator = new DefaultMemoryAllocator();
+#else
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                    allocator = new Win32DefaultMemoryAllocator();
+                    break;
+                case PlatformID.Unix:
+                case PlatformID.MacOSX:
+                    allocator = new UnixDefaultMemoryAllocator();
+                    break;
+                default:
+                    allocator = new DefaultMemoryAllocator();
+                    break;
+            }
+#endif
             _defaultAllocator = allocator;
             _allocator = allocator;
         }

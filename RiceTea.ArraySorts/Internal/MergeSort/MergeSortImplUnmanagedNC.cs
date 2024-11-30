@@ -6,6 +6,7 @@ using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
 using RiceTea.Numerics;
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal.MergeSort
@@ -52,7 +53,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         private static void SortCore(T* ptr, T* ptrEnd, long count)
         {
             IMemoryAllocator allocator = ArraySortsConfig.MemoryAllocator;
-            T* space = (T*)allocator.AllocMemory(unchecked((uint)(count * sizeof(T))));
+            T* space = (T*)allocator.AllocMemory(new IntPtr(count * sizeof(T)));
             SortCore(ptr, ptrEnd, space, count);
             allocator.FreeMemory(space);
         }

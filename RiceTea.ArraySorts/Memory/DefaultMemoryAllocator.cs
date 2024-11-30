@@ -7,9 +7,9 @@ using System.Buffers;
 
 namespace RiceTea.ArraySorts.Memory
 {
-    internal sealed class DefaultMemoryAllocator : IMemoryAllocator
+    internal class DefaultMemoryAllocator : IMemoryAllocator
     {
-        public T[] AllocArray<T>(int size)
+        public virtual T[] AllocArray<T>(int size)
         {
 #if NET5_0_OR_GREATER
             return ArrayPool<T>.Shared.Rent(size);
@@ -18,19 +18,19 @@ namespace RiceTea.ArraySorts.Memory
 #endif
         }
 
-        public unsafe void* AllocMemory(uint size)
+        public unsafe virtual void* AllocMemory(IntPtr size)
         {
-            return (void*)Marshal.AllocHGlobal(new IntPtr(size));
+            return (void*)Marshal.AllocHGlobal(size);
         }
 
-        public void FreeArray<T>(T[] array)
+        public virtual void FreeArray<T>(T[] array)
         {
 #if NET5_0_OR_GREATER
             ArrayPool<T>.Shared.Return(array);
 #endif
         }
 
-        public unsafe void FreeMemory(void* ptr)
+        public unsafe virtual void FreeMemory(void* ptr)
         {
             Marshal.FreeHGlobal(new IntPtr(ptr));
         }

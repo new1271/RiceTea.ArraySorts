@@ -21,8 +21,6 @@ namespace RiceTea.ArraySorts.Benchmark
         [GlobalSetup]
         public void Setup()
         {
-            ArraySortsConfig.MemoryAllocator = new Win32MemoryAllocator();
-
             int[] array = new int[N];
             for (int i = 0; i < N; i++)
             {
@@ -59,6 +57,12 @@ namespace RiceTea.ArraySorts.Benchmark
 
         [Benchmark]
         public void MergeSort() => ArraySorts.MergeSort(_array.Clone() as int[]);
+
+        [Benchmark]
+        public void InPlaceMergeSort() => ArraySorts.InPlaceMergeSort(_array.Clone() as int[]);
+
+        [Benchmark]
+        public void ShellSort() => ArraySorts.ShellSort(_array.Clone() as int[]);
 
         [Benchmark]
         public void BinaryInsertionSort() => ArraySorts.BinaryInsertionSort(_array.Clone() as int[]);

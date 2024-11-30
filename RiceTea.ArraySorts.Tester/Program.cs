@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime;
 
 namespace RiceTea.ArraySorts.Tester
 {
@@ -23,6 +24,7 @@ namespace RiceTea.ArraySorts.Tester
 
         public static void Main(string[] args)
         {
+            GCSettings.LatencyMode = GCLatencyMode.Batch;
             Console.Write("Please input the length of test sequence (Default is 64): ");
             int count = int.TryParse(Console.ReadLine(), out int result) ? Math.Max(result, 1) : 64;
             //int count = 8152;
@@ -38,12 +40,10 @@ namespace RiceTea.ArraySorts.Tester
             referenceSequence = sequence.Clone() as int[];
 
             Array.Reverse(sequence);
-            //Shuffle(sequence);
+            Shuffle(sequence);
 
             Func<int[], int[]> arrayCloneFunction = new Func<int[], int[]>(arr => arr.Clone() as int[]);
             Func<int[], List<int>> listCloneFunction = new Func<int[], List<int>>(arr => new List<int>(arr));
-
-            ArraySortsConfig.MemoryAllocator = new Win32MemoryAllocator();
 
             Console.WriteLine("--------------------");
             Console.WriteLine("T[] form:");
@@ -101,6 +101,7 @@ namespace RiceTea.ArraySorts.Tester
 
         private static void DoTest<T>(T[] sequence, T[] referenceSequence, SortFunction function, Func<T[], IList<T>> cloneFunction) where T : unmanaged
         {
+            Console.WriteLine();
             IComparer<T> comparer = Comparer<T>.Default;
             IList<T> testSequence = cloneFunction.Invoke(sequence);
             Stopwatch stopwatch = new Stopwatch();
@@ -108,74 +109,221 @@ namespace RiceTea.ArraySorts.Tester
             switch (function)
             {
                 case SortFunction.IntroSort:
-                    name = nameof(ArraySorts.IntroSort);
+                    {
+                        name = nameof(ArraySorts.IntroSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.IntroSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.IntroSort(testSequence, comparer);
+                            else
+                                ArraySorts.IntroSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.IntroSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.IntroSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.IntroSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 case SortFunction.QuickSort:
-                    name = nameof(ArraySorts.QuickSort);
+                    {
+                        name = nameof(ArraySorts.QuickSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.QuickSort(testSequence, comparer); 
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.QuickSort(testSequence, comparer);
+                            else
+                                ArraySorts.QuickSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.QuickSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.QuickSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.QuickSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 case SortFunction.MergeSort:
-                    name = nameof(ArraySorts.MergeSort);
+                    {
+                        name = nameof(ArraySorts.MergeSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.MergeSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.MergeSort(testSequence, comparer);
+                            else
+                                ArraySorts.MergeSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.MergeSort(testSequence, comparer);
-                    stopwatch.Stop();
-                    break;              
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.MergeSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.MergeSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
+                    break;
                 case SortFunction.InPlaceMergeSort:
-                    name = nameof(ArraySorts.InPlaceMergeSort);
+                    {
+                        name = nameof(ArraySorts.InPlaceMergeSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.InPlaceMergeSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.InPlaceMergeSort(testSequence, comparer);
+                            else
+                                ArraySorts.InPlaceMergeSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.InPlaceMergeSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.InPlaceMergeSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.InPlaceMergeSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 case SortFunction.InsertionSort:
-                    name = nameof(ArraySorts.InsertionSort);
+                    {
+                        name = nameof(ArraySorts.InsertionSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.InsertionSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.InsertionSort(testSequence, comparer);
+                            else
+                                ArraySorts.InsertionSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.InsertionSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.InsertionSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.InsertionSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 case SortFunction.BinaryInsertionSort:
-                    name = nameof(ArraySorts.BinaryInsertionSort);
+                    {
+                        name = nameof(ArraySorts.BinaryInsertionSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.BinaryInsertionSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.BinaryInsertionSort(testSequence, comparer);
+                            else
+                                ArraySorts.BinaryInsertionSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.BinaryInsertionSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.BinaryInsertionSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.BinaryInsertionSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 case SortFunction.ShellSort:
-                    name = nameof(ArraySorts.ShellSort);
+                    {
+                        name = nameof(ArraySorts.ShellSort);
+                        T[] testArray = testSequence as T[];
 #if !DEBUG
-                    ArraySorts.ShellSort(testSequence, comparer);
-                    testSequence = cloneFunction.Invoke(sequence);
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.ShellSort(testSequence, comparer);
+                            else
+                                ArraySorts.ShellSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
 #endif
-                    stopwatch.Restart();
-                    ArraySorts.ShellSort(testSequence, comparer);
-                    stopwatch.Stop();
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.ShellSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.ShellSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
                     break;
                 default:
                     throw new NotImplementedException();
