@@ -1,14 +1,7 @@
 ﻿using InlineMethod;
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Runtime.CompilerServices;
-
-#if !DEBUG
-using InlineIL;
-#endif
 
 namespace RiceTea.ArraySorts.Internal.BinaryInsertionSort
 {
@@ -29,11 +22,24 @@ namespace RiceTea.ArraySorts.Internal.BinaryInsertionSort
             SortCore(list, startIndex, endIndex, comparer);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(IList<T> list, int startIndex, int i, int endIndex, IComparer<T> comparer)
+        {
+            SortCore(list, startIndex, endIndex, comparer);
+        }
+
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
-            for (int i = startIndex + 1; i < endIndex; i++)
+            SortCore(list, startIndex, startIndex + 1, endIndex, comparer);
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(IList<T> list, int startIndex, int i, int endIndex, IComparer<T> comparer)
+        {
+            for (; i < endIndex; i++)
             {
                 T item = list[i];
                 int placeIndex = SortUtils.BinarySearchForNGI(list, startIndex, i, item, comparer);

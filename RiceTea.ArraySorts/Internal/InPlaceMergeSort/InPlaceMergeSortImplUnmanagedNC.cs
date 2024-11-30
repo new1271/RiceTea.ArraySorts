@@ -1,13 +1,10 @@
 ﻿
 using InlineMethod;
 
-using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Internal.ShellSort;
-using RiceTea.ArraySorts.Memory;
 using RiceTea.Numerics;
 
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort

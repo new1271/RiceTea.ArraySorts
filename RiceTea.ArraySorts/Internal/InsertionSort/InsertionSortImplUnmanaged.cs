@@ -1,4 +1,5 @@
 ﻿using InlineMethod;
+
 using RiceTea.Numerics;
 
 using System.Collections.Generic;
@@ -20,15 +21,22 @@ namespace RiceTea.ArraySorts.Internal.InsertionSort
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SortWithoutCheck(T* ptr, T* ptrEnd, IComparer<T> comparer)
-        {
-            SortCore(ptr, ptrEnd, comparer);
-        }
+            => SortCore(ptr, ptrEnd, comparer);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(T* ptr, T* iterator, T* ptrEnd, IComparer<T> comparer)
+            => SortCore(ptr, iterator, ptrEnd, comparer);
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer)
+            => SortCore(ptr, ptr + 1, ptrEnd, comparer);
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(T* ptr, T* iterator, T* ptrEnd, IComparer<T> comparer)
         {
-            for (T* iterator = ptr + 1; iterator < ptrEnd; iterator++)
+            for (; iterator < ptrEnd; iterator++)
             {
                 T item = *iterator;
                 T* iteratorReverse;

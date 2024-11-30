@@ -18,15 +18,22 @@ namespace RiceTea.ArraySorts.Internal.InsertionSort
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SortWithoutCheck(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
-        {
-            SortCore(list, startIndex, endIndex, comparer);
-        }
+            => SortCore(list, startIndex, endIndex, comparer);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(IList<T> list, int startIndex, int i, int endIndex, IComparer<T> comparer)
+            => SortCore(list, startIndex, i, endIndex, comparer);
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
+            => SortCore(list, startIndex, startIndex + 1, endIndex, comparer);
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SortCore(IList<T> list, int startIndex, int i , int endIndex, IComparer<T> comparer)
         {
-            for (int i = startIndex + 1; i < endIndex; i++)
+            for (; i < endIndex; i++)
             {
                 T item = list[i];
                 int reverseIndex;
