@@ -70,6 +70,11 @@ namespace RiceTea.ArraySorts.Config
         /// <summary>
         /// Use BinaryInsertionSort in very short section (&lt;=16) to optimize sorting time
         /// </summary>
-        public static bool OptimizeSorting { get; set; }
+        public static bool OptimizeTinySequenceSorting { get; set; }
+
+        /// <summary>
+        /// Simply fix the sequence if it is sorted or reversed-sorted.
+        /// </summary>
+        public static bool OptimizeSortedSequence { get; set; }
     }
 }

@@ -219,45 +219,120 @@ namespace RiceTea.ArraySorts.Internal
             }
         }
 
-        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool OptimizeSort<T>(IList<T> list, int startIndex, int endIndex, int count, IComparer<T> comparer)
         {
             if (count > 16)
-                return false;
-            if (ShortCircuitSort(list, startIndex, count, comparer))
+                return CheckPattern(list, startIndex, endIndex, comparer);
+            if (ShortCircuitSort(list, startIndex, count, comparer) || CheckPattern(list, startIndex, endIndex, comparer))
                 return true;
-            if (!ArraySortsConfig.OptimizeSorting)
+            if (!ArraySortsConfig.OptimizeTinySequenceSorting)
                 return false;
             BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
             return true;
         }
 
-        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool OptimizeSort<T>(T* ptr, T* ptrEnd, long count, IComparer<T> comparer)
         {
             if (count > 16L)
-                return false;
-            if (ShortCircuitSort(ptr, count, comparer))
+                return CheckPattern(ptr, ptrEnd, comparer);
+            if (ShortCircuitSort(ptr, count, comparer) || CheckPattern(ptr, ptrEnd, comparer))
                 return true;
-            if (!ArraySortsConfig.OptimizeSorting)
+            if (!ArraySortsConfig.OptimizeTinySequenceSorting)
                 return false;
             BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
             return true;
         }
 
-        [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool OptimizeSortNC<T>(T* ptr, T* ptrEnd, long count)
         {
             if (count > 16L)
-                return false;
-            if (ShortCircuitSortNC(ptr, count))
+                return CheckPatternNC(ptr, ptrEnd);
+            if (ShortCircuitSortNC(ptr, count) || CheckPatternNC(ptr, ptrEnd))
                 return true;
-            if (!ArraySortsConfig.OptimizeSorting)
+            if (!ArraySortsConfig.OptimizeTinySequenceSorting)
                 return false;
             BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool CheckPattern<T>(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
+        {
+            if (!ArraySortsConfig.OptimizeSortedSequence)
+                return false;
+            int i = startIndex + 1;
+            if (i >= endIndex)
+                return true;
+            int headCompare = comparer.Compare(list[i], list[startIndex]);
+            while (++i < endIndex)
+            {
+                int newCompare = comparer.Compare(list[i], list[i - 1]);
+                if (headCompare != newCompare)
+                    return false;
+            }
+            if (headCompare < 0)
+            {
+                i = startIndex;
+                for (int j = endIndex - 1; i < j; i++, j--)
+                {
+                    (list[i], list[j]) = (list[j], list[i]);
+                }
+            }
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool CheckPattern<T>(T* ptr, T* ptrEnd, IComparer<T> comparer)
+        {
+            if (!ArraySortsConfig.OptimizeSortedSequence)
+                return false;
+            T* iterator = ptr + 1;
+            if (iterator >= ptrEnd)
+                return true;
+            int headCompare = comparer.Compare(*iterator, *ptr);
+            while (++iterator < ptrEnd)
+            {
+                int newCompare = comparer.Compare(*iterator, *(iterator - 1));
+                if (headCompare != newCompare)
+                    return false;
+            }
+            if (headCompare < 0)
+            {
+                iterator = ptr;
+                for (T* iterator2 = ptrEnd - 1; iterator < iterator2; iterator++, iterator2--)
+                {
+                    (*iterator, *iterator2) = (*iterator2, *iterator);
+                }
+            }
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool CheckPatternNC<T>(T* ptr, T* ptrEnd)
+        {
+            if (!ArraySortsConfig.OptimizeSortedSequence)
+                return false;
+            T* iterator = ptr + 1;
+            if (iterator >= ptrEnd)
+                return true;
+            PackedPrimitive<T> headCompare = new PackedPrimitive<T>(*iterator) - *ptr;
+            while (++iterator < ptrEnd)
+            {
+                PackedPrimitive<T> compare = new PackedPrimitive<T>(*iterator) - *(iterator - 1);
+                if (headCompare != compare)
+                    return false;
+            }
+            if (headCompare < default(T))
+            {
+                iterator = ptr;
+                for (T* iterator2 = ptrEnd - 1; iterator < iterator2; iterator++, iterator2--)
+                {
+                    (*iterator, *iterator2) = (*iterator2, *iterator);
+                }
+            }
             return true;
         }
     }

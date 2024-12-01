@@ -27,28 +27,8 @@ namespace RiceTea.ArraySorts.Tester
         {
             GCSettings.LatencyMode = GCLatencyMode.Batch;
 
-            Console.Write("Please input the length of test sequence (Default is 64): ");
-            int count = int.TryParse(Console.ReadLine(), out int result) ? Math.Max(result, 1) : 64;
-
-            Console.Write("Use optimize sorting? (T or F, default is F): ");
-            if (Console.ReadLine().Trim().Equals("T", StringComparison.OrdinalIgnoreCase))
-            {
-                ArraySortsConfig.OptimizeSorting = true;
-            }
-            //int count = 8152;
-
-            int[] sequence = new int[count];
-            int[] referenceSequence;
-            _sequence = sequence;
-            for (int i = 0; i < count; i++)
-            {
-                sequence[i] = i;
-            }
-
-            referenceSequence = sequence.Clone() as int[];
-
-            Array.Reverse(sequence);
-            Shuffle(sequence);
+            SettingAlgorithmOptions();
+            SettingTestData(out int[] sequence, out int[] referenceSequence);
 
             Func<int[], int[]> arrayCloneFunction = new Func<int[], int[]>(arr => arr.Clone() as int[]);
             Func<int[], List<int>> listCloneFunction = new Func<int[], List<int>>(arr => new List<int>(arr));
@@ -91,6 +71,52 @@ namespace RiceTea.ArraySorts.Tester
             GC.Collect();
 
             Console.Read();
+        }
+
+        private static void SettingTestData(out int[] sequence, out int[] referenceSequence)
+        {
+            Console.WriteLine("★ Test data options:");
+            Console.Write("→ Please input the length of test sequence (Default is 256): ");
+            int count = int.TryParse(Console.ReadLine(), out int result) ? Math.Max(result, 1) : 256;
+            sequence = new int[count];
+            _sequence = sequence;
+            for (int i = 0; i < count; i++)
+            {
+                sequence[i] = i;
+            }
+
+            referenceSequence = sequence.Clone() as int[];
+
+            Console.Write("→ Which preprocessing for the test sequence you want? \n(0 = Shuffled, 1 = Sorted, 2 = Reverse-sorted, default is 0): ");
+            switch (int.TryParse(Console.ReadLine(), out int selection) ? selection : 0)
+            {
+                case 0:
+                    Array.Reverse(sequence);
+                    Shuffle(sequence);
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    Array.Reverse(sequence);
+                    break;
+                default:
+                    goto case 0;
+            }
+        }
+
+        private static void SettingAlgorithmOptions()
+        {
+            Console.WriteLine("★ Algorithm options:");
+            Console.Write("→ Optimize tiny sequence sorting? (T or F, default is F): ");
+            if (Console.ReadLine().Trim().Equals("T", StringComparison.OrdinalIgnoreCase))
+            {
+                ArraySortsConfig.OptimizeTinySequenceSorting = true;
+            }
+            Console.Write("→ Optimize sorted sequence? (T or F, default is F): ");
+            if (Console.ReadLine().Trim().Equals("T", StringComparison.OrdinalIgnoreCase))
+            {
+                ArraySortsConfig.OptimizeSortedSequence = true;
+            }
         }
 
         private static void Shuffle<T>(T[] sequence)
@@ -142,7 +168,7 @@ namespace RiceTea.ArraySorts.Tester
                             stopwatch.Stop();
                         }
                     }
-                    break;               
+                    break;
                 case SortFunction.HeapSort:
                     {
                         name = nameof(ArraySorts.HeapSort);
