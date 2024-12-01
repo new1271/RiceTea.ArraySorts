@@ -67,8 +67,16 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (new PackedPrimitive<T>(left) < right)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2 || SortUtils.ShortCircuitSortNC(ptr, count))
+            if (new PackedPrimitive<T>(*ptr) > *(ptrEnd - 1))
+            {
+                uint byteCount = unchecked((uint)(count * sizeof(T)));
+                uint byteCountRight = unchecked((uint)((ptrEnd - pivot) * sizeof(T)));
+                long countRight = ptrEnd - pivot;
+                UnsafeHelper.CopyBlock(space, pivot, byteCountRight);
+                UnsafeHelper.CopyBlock(ptrEnd - (pivot - ptr), ptr, byteCount - byteCountRight);
+                UnsafeHelper.CopyBlock(ptr, space, byteCountRight);
                 return;
+            }
             UnsafeHelper.CopyBlock(space, ptr, unchecked((uint)(count * sizeof(T))));
             MergeCore(ptr, pivot, ptrEnd, space);
         }

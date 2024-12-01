@@ -5,6 +5,7 @@ using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Internal.ShellSort;
 using RiceTea.ArraySorts.Memory;
+using RiceTea.Numerics;
 
 using System;
 using System.Collections.Generic;
@@ -62,8 +63,16 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2 || SortUtils.ShortCircuitSort(ptr, count, comparer))
+            if (comparer.Compare(*ptr, *(ptrEnd - 1)) > 0)
+            {
+                uint byteCount = unchecked((uint)(count * sizeof(T)));
+                uint byteCountRight = unchecked((uint)((ptrEnd - pivot) * sizeof(T)));
+                long countRight = ptrEnd - pivot;
+                UnsafeHelper.CopyBlock(space, pivot, byteCountRight);
+                UnsafeHelper.CopyBlock(ptrEnd - (pivot - ptr), ptr, byteCount - byteCountRight);
+                UnsafeHelper.CopyBlock(ptr, space, byteCountRight);
                 return;
+            }
             UnsafeHelper.CopyBlock(space, ptr, unchecked((uint)(count * sizeof(T))));
             MergeCore(ptr, pivot, ptrEnd, space, comparer);
         }

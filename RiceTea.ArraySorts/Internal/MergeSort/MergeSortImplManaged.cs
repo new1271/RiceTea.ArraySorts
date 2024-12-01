@@ -59,8 +59,17 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             int count = endIndex - startIndex;
-            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+            if (comparer.Compare(list[startIndex], list[endIndex - 1]) > 0)
+            {
+                int countRight = endIndex - pivotIndex;
+                MemoryUtils.CopyToArray(space, list, pivotIndex, 0, endIndex - pivotIndex);
+                for (int i = pivotIndex - 1, j = endIndex - 1; i >= startIndex; i--, j--)
+                {
+                    list[j] = list[i];
+                }
+                MemoryUtils.CopyToList(list, space, 0, startIndex, countRight);
                 return;
+            }
             MemoryUtils.CopyToArray(space, list, startIndex, 0, count);
             MergeCore(list, space, startIndex, pivotIndex, endIndex, comparer);
         }
