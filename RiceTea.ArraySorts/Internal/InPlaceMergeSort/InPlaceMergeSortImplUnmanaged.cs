@@ -16,13 +16,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
             SortCore(ptr, ptrEnd, count, comparer);
         }
 
@@ -36,13 +31,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         private static void SortInternal(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
             SortCore(ptr, ptrEnd, count, comparer);
         }
 
@@ -65,7 +55,7 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
             int step = unchecked((int)count);
             do

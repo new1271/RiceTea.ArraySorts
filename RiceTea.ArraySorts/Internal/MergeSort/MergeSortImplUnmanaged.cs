@@ -2,7 +2,6 @@
 using InlineMethod;
 
 using RiceTea.ArraySorts.Config;
-using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Memory;
 
 using System;
@@ -18,19 +17,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
-            SortCore(ptr, ptrEnd, count, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortWithoutCheck(T* ptr, T* ptrEnd, long count, IComparer<T> comparer)
-        {
             SortCore(ptr, ptrEnd, count, comparer);
         }
 
@@ -38,13 +26,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         private static void SortInternal(T* ptr, T* ptrEnd, T* space, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
             SortCore(ptr, ptrEnd, space, count, comparer);
         }
 
@@ -77,13 +60,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
             UnsafeHelper.CopyBlock(space, ptr, unchecked((uint)(count * sizeof(T))));
             MergeCore(ptr, pivot, ptrEnd, space, comparer);
         }

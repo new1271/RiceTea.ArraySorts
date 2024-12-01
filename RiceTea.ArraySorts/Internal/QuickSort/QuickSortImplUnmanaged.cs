@@ -17,79 +17,51 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16L)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            }
-            if (SortCore(ptr, ptrEnd, comparer))
-                return;
-            MergeSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, count, comparer);
+            SortCore(ptr, ptrEnd - 1, comparer);
         }
 
-        //Code from https://stackoverflow.com/questions/55008384/can-quicksort-be-implemented-in-c-without-stack-and-recursion
-        //Original from http://alienryderflex.com/quicksort/
-        [MethodImpl(MethodImplOptions.NoInlining)] //因為 stackalloc 的關係, 這裡不能內聯 (避免出現 StackOverflowException )
-        private static bool SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer)
+        //Code from https://stackoverflow.com/questions/33884057/quick-sort-stackoverflow-error-for-large-arrays
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static unsafe void SortCore(T* ptr, T* ptrLast, IComparer<T> comparer)
         {
-            int* beg = stackalloc int[MAX_LEVELS];
-            int* end = stackalloc int[MAX_LEVELS];
-            int L, R;
-            int i = 0;
-
-            beg[0] = 0;
-            end[0] = unchecked((int)(ptrEnd - ptr));
-            while (i >= 0)
+            while (ptr < ptrLast)
             {
-                L = beg[i];
-                R = end[i];
-                if (R - L > 1)
+                T* ptrPivot = Partition(ptr, ptrLast, comparer);
+                if (ptrPivot - ptr <= (ptrLast - ptrPivot) - 1)
                 {
-                    int M = L + ((R - L) >> 1);
-                    T piv = ptr[M];
-                    ptr[M] = ptr[L];
-
-                    if (i == MAX_LEVELS - 1)
-                        return false;
-                    R--;
-                    while (L < R)
-                    {
-                        while (comparer.Compare(ptr[R], piv) >= 0 && L < R)
-                            R--;
-                        if (L < R)
-                            ptr[L++] = ptr[R];
-                        while (comparer.Compare(ptr[L], piv) <= 0 && L < R)
-                            L++;
-                        if (L < R)
-                            ptr[R--] = ptr[L];
-                    }
-                    ptr[L] = piv;
-                    M = L + 1;
-                    while (L > beg[i] && comparer.Compare(ptr[L - 1], piv) == 0)
-                        L--;
-                    while (M < end[i] && comparer.Compare(ptr[M], piv) == 0)
-                        M++;
-                    if (L - beg[i] > end[i] - M)
-                    {
-                        beg[i + 1] = M;
-                        end[i + 1] = end[i];
-                        end[i++] = L;
-                    }
-                    else
-                    {
-                        beg[i + 1] = beg[i];
-                        end[i + 1] = L;
-                        beg[i++] = M;
-                    }
+                    SortCore(ptr, ptrPivot, comparer);
+                    ptr = ptrPivot + 1;
                 }
                 else
                 {
-                    i--;
+                    SortCore(ptrPivot + 1, ptrLast, comparer);
+                    ptrLast = ptrPivot;
                 }
             }
-            return true;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static T* Partition(T* ptr, T* ptrLast, IComparer<T> comparer)
+        {
+            T pivot = *ptr;
+            T* leftIterator = ptr - 1;
+            T* rightIterator = ptrLast + 1;
+
+            while (true)
+            {
+                while (++leftIterator < ptrLast && comparer.Compare(*leftIterator, pivot) < 0) ;
+                while (--rightIterator > ptr && comparer.Compare(*rightIterator, pivot) > 0) ;
+
+                if (leftIterator < rightIterator)
+                {
+                    (*leftIterator, *rightIterator) = (*rightIterator, *leftIterator);
+                    continue;
+                }
+                return rightIterator;
+            }
         }
     }
 }

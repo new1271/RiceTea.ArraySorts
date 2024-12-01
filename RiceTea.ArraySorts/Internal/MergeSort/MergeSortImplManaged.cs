@@ -16,19 +16,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
-            SortCore(list, startIndex, endIndex, count, comparer);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortWithoutCheck(IList<T> list, int startIndex, int endIndex, int count, IComparer<T> comparer)
-        {
             SortCore(list, startIndex, endIndex, count, comparer);
         }
 
@@ -36,13 +25,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         private static void SortInternal(IList<T> list, T[] space, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
             SortCore(list, space, startIndex, endIndex, count, comparer);
         }
 
@@ -74,13 +58,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
             MemoryUtils.CopyToArray(space, list, startIndex, 0, count);
             MergeCore(list, space, startIndex, pivotIndex, endIndex, comparer);
         }

@@ -4,6 +4,8 @@ using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.ArraySorts.Internal.MergeSort;
 using RiceTea.Numerics;
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal.QuickSort
@@ -17,80 +19,51 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         public static void Sort(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16L)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
-            if (SortCore(ptr, ptrEnd))
-                return;
-            MergeSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd, count);
+            SortCore(ptr, ptrEnd - 1);
         }
 
-        //Code from https://stackoverflow.com/questions/55008384/can-quicksort-be-implemented-in-c-without-stack-and-recursion
-        //Original from http://alienryderflex.com/quicksort/
-        [MethodImpl(MethodImplOptions.NoInlining)] //因為 stackalloc 的關係, 這裡不能內聯 (避免出現 StackOverflowException )
-        private static bool SortCore(T* ptr, T* ptrEnd)
+        //Code from https://stackoverflow.com/questions/33884057/quick-sort-stackoverflow-error-for-large-arrays
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static unsafe void SortCore(T* ptr, T* ptrLast)
         {
-            int* beg = stackalloc int[MAX_LEVELS];
-            int* end = stackalloc int[MAX_LEVELS];
-            int L, R;
-            int i = 0;
-
-            beg[0] = 0;
-            end[0] = unchecked((int)(ptrEnd - ptr));
-            while (i >= 0)
+            while (ptr < ptrLast)
             {
-                L = beg[i];
-                R = end[i];
-                if (R - L > 1)
+                T* ptrPivot = Partition(ptr, ptrLast);
+                if (ptrPivot - ptr <= (ptrLast - ptrPivot) - 1)
                 {
-                    int M = L + ((R - L) >> 1);
-                    PackedPrimitive<T> piv = new PackedPrimitive<T>(ptr[M]);
-                    ptr[M] = ptr[L];
-
-                    if (i == MAX_LEVELS - 1)
-                        return false;
-                    R--;
-                    while (L < R)
-                    {
-                        while (ptr[R] >= piv && L < R)
-                            R--;
-                        if (L < R)
-                            ptr[L++] = ptr[R];
-                        while (ptr[L] <= piv && L < R)
-                            L++;
-                        if (L < R)
-                            ptr[R--] = ptr[L];
-                    }
-                    ptr[L] = piv.Value;
-                    M = L + 1;
-                    while (L > beg[i] && ptr[L - 1] == piv)
-                        L--;
-                    while (M < end[i] && ptr[M] == piv)
-                        M++;
-                    if (L - beg[i] > end[i] - M)
-                    {
-                        beg[i + 1] = M;
-                        end[i + 1] = end[i];
-                        end[i++] = L;
-                    }
-                    else
-                    {
-                        beg[i + 1] = beg[i];
-                        end[i + 1] = L;
-                        beg[i++] = M;
-                    }
+                    SortCore(ptr, ptrPivot);
+                    ptr = ptrPivot + 1;
                 }
                 else
                 {
-                    i--;
+                    SortCore(ptrPivot + 1, ptrLast);
+                    ptrLast = ptrPivot;
                 }
             }
-            return true;
         }
 
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static T* Partition(T* ptr, T* ptrLast)
+        {
+            PackedPrimitive<T> pivot = *ptr;
+            T* leftIterator = ptr - 1;
+            T* rightIterator = ptrLast + 1;
+
+            while (true)
+            {
+                while (++leftIterator < ptrLast && *leftIterator < pivot) ;
+                while (--rightIterator > ptr && *rightIterator > pivot) ;
+
+                if (leftIterator < rightIterator)
+                {
+                    (*leftIterator, *rightIterator) = (*rightIterator, *leftIterator);
+                    continue;
+                }
+                return rightIterator;
+            }
+        }
     }
 }

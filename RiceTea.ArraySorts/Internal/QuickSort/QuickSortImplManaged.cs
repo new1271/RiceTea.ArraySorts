@@ -16,79 +16,51 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.Sort(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
-            if (SortCore(list, startIndex, endIndex, comparer))
-                return;
-            MergeSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, count, comparer);
+            SortCore(list, startIndex, endIndex - 1, comparer);
         }
 
-        //Code from https://stackoverflow.com/questions/55008384/can-quicksort-be-implemented-in-c-without-stack-and-recursion
-        //Original from http://alienryderflex.com/quicksort/
-        [MethodImpl(MethodImplOptions.NoInlining)] //因為 stackalloc 的關係, 這裡不能內聯 (避免出現 StackOverflowException )
-        private static unsafe bool SortCore(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
+        //Code from https://stackoverflow.com/questions/33884057/quick-sort-stackoverflow-error-for-large-arrays
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static unsafe void SortCore(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer)
         {
-            int* beg = stackalloc int[MAX_LEVELS];
-            int* end = stackalloc int[MAX_LEVELS];
-            int L, R;
-            int i = 0;
-
-            beg[0] = startIndex;
-            end[0] = endIndex;
-            while (i >= 0)
+            while (startIndex < lastIndex)
             {
-                L = beg[i];
-                R = end[i];
-                if (R - L > 1)
+                int pivotIndex = Partition(list, startIndex, lastIndex, comparer);
+                if (pivotIndex - startIndex <= lastIndex - (pivotIndex + 1))
                 {
-                    int M = L + ((R - L) >> 1);
-                    T piv = list[M];
-                    list[M] = list[L];
-
-                    if (i == MAX_LEVELS - 1)
-                        return false;
-                    R--;
-                    while (L < R)
-                    {
-                        while (comparer.Compare(list[R], piv) >= 0 && L < R)
-                            R--;
-                        if (L < R)
-                            list[L++] = list[R];
-                        while (comparer.Compare(list[L], piv) <= 0 && L < R)
-                            L++;
-                        if (L < R)
-                            list[R--] = list[L];
-                    }
-                    list[L] = piv;
-                    M = L + 1;
-                    while (L > beg[i] && comparer.Compare(list[L - 1], piv) == 0)
-                        L--;
-                    while (M < end[i] && comparer.Compare(list[M], piv) == 0)
-                        M++;
-                    if (L - beg[i] > end[i] - M)
-                    {
-                        beg[i + 1] = M;
-                        end[i + 1] = end[i];
-                        end[i++] = L;
-                    }
-                    else
-                    {
-                        beg[i + 1] = beg[i];
-                        end[i + 1] = L;
-                        beg[i++] = M;
-                    }
+                    SortCore(list, startIndex, pivotIndex, comparer);
+                    startIndex = pivotIndex + 1;
                 }
                 else
                 {
-                    i--;
+                    SortCore(list, pivotIndex + 1, lastIndex, comparer);
+                    lastIndex = pivotIndex;
                 }
             }
-            return true;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Partition(IList<T> list, int startIndex, int lastIndex, IComparer<T> comparer)
+        {
+            T pivot = list[startIndex];
+            int leftIndex = startIndex - 1;
+            int rightIndex = lastIndex + 1;
+
+            while (true)
+            {
+                while (++leftIndex < lastIndex && comparer.Compare(list[leftIndex], pivot) < 0) ;
+                while (--rightIndex > startIndex && comparer.Compare(list[rightIndex], pivot) > 0) ;
+
+                if (leftIndex < rightIndex)
+                {
+                    (list[rightIndex], list[leftIndex]) = (list[leftIndex], list[rightIndex]);
+                    continue;
+                }
+                return rightIndex;
+            }
         }
     }
 }

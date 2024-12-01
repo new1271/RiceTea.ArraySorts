@@ -1,4 +1,6 @@
-﻿using RiceTea.ArraySorts.Memory;
+﻿using InlineMethod;
+
+using RiceTea.ArraySorts.Memory;
 
 using System;
 using System.Runtime.CompilerServices;
@@ -12,7 +14,7 @@ namespace RiceTea.ArraySorts.Config
     {
         private static readonly IMemoryAllocator _defaultAllocator;
 
-        private static IMemoryAllocator _allocator;
+        internal static IMemoryAllocator _allocator;
 
         static ArraySortsConfig()
         {
@@ -64,5 +66,10 @@ namespace RiceTea.ArraySorts.Config
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _allocator = value ?? _defaultAllocator;
         }
+
+        /// <summary>
+        /// Use BinaryInsertionSort in very short section (&lt;=16) to optimize sorting time
+        /// </summary>
+        public static bool OptimizeSorting { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using InlineMethod;
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -31,7 +32,7 @@ namespace RiceTea.ArraySorts.Internal.InsertionSort
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void SortCore(IList<T> list, int startIndex, int i , int endIndex, IComparer<T> comparer)
+        private static void SortCore(IList<T> list, int startIndex, int i, int endIndex, IComparer<T> comparer)
         {
             for (; i < endIndex; i++)
             {

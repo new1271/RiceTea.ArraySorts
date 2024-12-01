@@ -18,13 +18,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         public static void Sort(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
             SortCore(ptr, ptrEnd, count);
         }
 
@@ -38,13 +33,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
         private static void SortInternal(T* ptr, T* ptrEnd, T* space)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
             SortCore(ptr, ptrEnd, space, count);
         }
 
@@ -76,13 +66,8 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (new PackedPrimitive<T>(left) < right)
                 return;
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
             UnsafeHelper.CopyBlock(space, ptr, unchecked((uint)(count * sizeof(T))));
             MergeCore(ptr, pivot, ptrEnd, space);
         }

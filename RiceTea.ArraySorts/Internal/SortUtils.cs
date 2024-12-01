@@ -5,6 +5,12 @@ using RiceTea.Numerics;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using RiceTea.ArraySorts.Config;
+using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
+using System.Collections;
+
+
+
 
 #if !DEBUG
 using InlineIL;
@@ -17,6 +23,7 @@ namespace RiceTea.ArraySorts.Internal
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
 
         [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrEmpty<T>(IList<T> list) => list is null || list.Count <= 0;
 
         [Inline(InlineBehavior.Remove)]
@@ -118,6 +125,7 @@ namespace RiceTea.ArraySorts.Internal
         }
 
         [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool Sort3NC<T>(ref T a, ref T b, ref T c)
         {
             bool isDirty = false;
@@ -140,6 +148,7 @@ namespace RiceTea.ArraySorts.Internal
         }
 
         [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool Sort3<T>(ref T a, ref T b, ref T c, IComparer<T> comparer)
         {
             bool isDirty = false;
@@ -159,6 +168,48 @@ namespace RiceTea.ArraySorts.Internal
                 isDirty = true;
             }
             return isDirty;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool OptimizeSort<T>(IList<T> list, int startIndex, int endIndex, int count, IComparer<T> comparer)
+        {
+            if (count > 16)
+                return false;
+            if (ShortCircuitSort(list, startIndex, count, comparer))
+                return true;
+            if (!ArraySortsConfig.OptimizeSorting)
+                return false;
+            BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            return true;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool OptimizeSort<T>(T* ptr, T* ptrEnd, long count, IComparer<T> comparer)
+        {
+            if (count > 16L)
+                return false;
+            if (ShortCircuitSort(ptr, count, comparer))
+                return true;
+            if (!ArraySortsConfig.OptimizeSorting)
+                return false;
+            BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            return true;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool OptimizeSortNC<T>(T* ptr, T* ptrEnd, long count)
+        {
+            if (count > 16L)
+                return false;
+            if (ShortCircuitSortNC(ptr, count))
+                return true;
+            if (!ArraySortsConfig.OptimizeSorting)
+                return false;
+            BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            return true;
         }
     }
 }

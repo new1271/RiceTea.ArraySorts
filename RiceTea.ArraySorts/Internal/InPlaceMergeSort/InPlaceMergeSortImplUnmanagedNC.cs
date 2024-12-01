@@ -16,19 +16,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         public static void Sort(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
-            SortCore(ptr, ptrEnd, count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortWithoutCheck(T* ptr, T* ptrEnd, long count)
-        {
             SortCore(ptr, ptrEnd, count);
         }
 
@@ -36,13 +25,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         private static void SortInternal(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count <= 16)
-            {
-                if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
-                    return;
-                BinaryInsertionSortImplUnmanagedNC<T>.SortWithoutCheck(ptr, ptrEnd);
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
-            }
             SortCore(ptr, ptrEnd, count);
         }
 
@@ -64,7 +48,7 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (new PackedPrimitive<T>(left) < right)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
+            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
                 return;
             int step = unchecked((int)count);
             do

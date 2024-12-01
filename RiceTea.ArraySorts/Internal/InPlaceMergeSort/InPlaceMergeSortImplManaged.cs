@@ -15,13 +15,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
             SoreCore(list, startIndex, endIndex, count, comparer);
         }
 
@@ -35,13 +30,8 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
         private static void SortInternal(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count <= 16)
-            {
-                if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
-                    return;
-                BinaryInsertionSortImplManaged<T>.SortWithoutCheck(list, startIndex, endIndex, comparer);
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
-            }
             SoreCore(list, startIndex, endIndex, count, comparer);
         }
 
@@ -63,7 +53,7 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             int count = endIndex - startIndex;
-            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
                 return;
             do
             {

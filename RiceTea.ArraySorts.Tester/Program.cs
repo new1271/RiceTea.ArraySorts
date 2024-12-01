@@ -14,6 +14,7 @@ namespace RiceTea.ArraySorts.Tester
         private enum SortFunction
         {
             IntroSort,
+            HeapSort,
             QuickSort,
             MergeSort,
             InPlaceMergeSort,
@@ -25,8 +26,15 @@ namespace RiceTea.ArraySorts.Tester
         public static void Main(string[] args)
         {
             GCSettings.LatencyMode = GCLatencyMode.Batch;
+
             Console.Write("Please input the length of test sequence (Default is 64): ");
             int count = int.TryParse(Console.ReadLine(), out int result) ? Math.Max(result, 1) : 64;
+
+            Console.Write("Use optimize sorting? (T or F, default is F): ");
+            if (Console.ReadLine().Trim().Equals("T", StringComparison.OrdinalIgnoreCase))
+            {
+                ArraySortsConfig.OptimizeSorting = true;
+            }
             //int count = 8152;
 
             int[] sequence = new int[count];
@@ -39,7 +47,7 @@ namespace RiceTea.ArraySorts.Tester
 
             referenceSequence = sequence.Clone() as int[];
 
-            Array.Reverse(sequence);
+            //Array.Reverse(sequence);
             Shuffle(sequence);
 
             Func<int[], int[]> arrayCloneFunction = new Func<int[], int[]>(arr => arr.Clone() as int[]);
@@ -50,6 +58,8 @@ namespace RiceTea.ArraySorts.Tester
 
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, arrayCloneFunction);
             GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.HeapSort, arrayCloneFunction);
+            GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.QuickSort, arrayCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.MergeSort, arrayCloneFunction);
@@ -58,15 +68,13 @@ namespace RiceTea.ArraySorts.Tester
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.ShellSort, arrayCloneFunction);
             GC.Collect();
-            DoTest(sequence, referenceSequence, SortFunction.BinaryInsertionSort, arrayCloneFunction);
-            GC.Collect();
-            DoTest(sequence, referenceSequence, SortFunction.InsertionSort, arrayCloneFunction);
-            GC.Collect();
 
             Console.WriteLine("--------------------");
             Console.WriteLine("List<T> form:");
 
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, listCloneFunction);
+            GC.Collect();
+            DoTest(sequence, referenceSequence, SortFunction.HeapSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.QuickSort, listCloneFunction);
             GC.Collect();
@@ -75,10 +83,6 @@ namespace RiceTea.ArraySorts.Tester
             DoTest(sequence, referenceSequence, SortFunction.InPlaceMergeSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.ShellSort, listCloneFunction);
-            GC.Collect();
-            DoTest(sequence, referenceSequence, SortFunction.BinaryInsertionSort, listCloneFunction);
-            GC.Collect();
-            DoTest(sequence, referenceSequence, SortFunction.InsertionSort, listCloneFunction);
             GC.Collect();
 
             Console.WriteLine("--------------------");
@@ -135,6 +139,37 @@ namespace RiceTea.ArraySorts.Tester
                         {
                             stopwatch.Restart();
                             ArraySorts.IntroSort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
+                    break;               
+                case SortFunction.HeapSort:
+                    {
+                        name = nameof(ArraySorts.HeapSort);
+                        T[] testArray = testSequence as T[];
+#if !DEBUG
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                ArraySorts.HeapSort(testSequence, comparer);
+                            else
+                                ArraySorts.HeapSort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
+#endif
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.HeapSort(testSequence, comparer);
+                            stopwatch.Stop();
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            ArraySorts.HeapSort(testArray, comparer);
                             stopwatch.Stop();
                         }
                     }

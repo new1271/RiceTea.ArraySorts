@@ -23,8 +23,8 @@ namespace RiceTea.ArraySorts
                 throw new ArgumentOutOfRangeException(nameof(length), $"'{nameof(length)}' is less than zero.");
             if (array.Length - index < length)
                 throw new ArgumentException($"'{nameof(index)}' and '{nameof(length)}' do not specify a valid range in '{nameof(array)}'.");
-        }       
-        
+        }
+
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void CheckArguments<T>(IList<T> list, int index, int count)
@@ -47,7 +47,7 @@ namespace RiceTea.ArraySorts
                 throw new ArgumentNullException(nameof(array));
             return array.Length;
         }
-        
+
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int CheckArgumentsAndReturnCount<T>(IList<T> list)
