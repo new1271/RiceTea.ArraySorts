@@ -12,7 +12,7 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
         public static void Sort(T* ptr, T* ptrEnd)
         {
             long count = ptrEnd - ptr;
-            if (count < 2 || SortUtils.ShortCircuitSortNC(ptr, count))
+            if (count < 2 || SortUtils.ShortCircuitSortNC(ptr, count) || SortUtils.CheckPatternNC(ptr, ptrEnd))
                 return;
             SortInternal(ptr, ptrEnd);
         }

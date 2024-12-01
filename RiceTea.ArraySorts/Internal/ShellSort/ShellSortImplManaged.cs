@@ -10,7 +10,7 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
         public static void Sort(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
         {
             int count = endIndex - startIndex;
-            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
+            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer) || SortUtils.CheckPattern(list, startIndex, endIndex, comparer))
                 return;
             SortInternal(list, startIndex, endIndex, comparer);
         }

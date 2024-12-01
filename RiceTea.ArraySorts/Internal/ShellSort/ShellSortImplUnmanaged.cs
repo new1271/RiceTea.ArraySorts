@@ -11,7 +11,7 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
             long count = ptrEnd - ptr;
-            if (count < 2 || SortUtils.ShortCircuitSort(ptr, count, comparer))
+            if (count < 2 || SortUtils.ShortCircuitSort(ptr, count, comparer) || SortUtils.CheckPattern(ptr, ptrEnd, comparer))
                 return;
             SortInternal(ptr, ptrEnd, comparer);
         }
