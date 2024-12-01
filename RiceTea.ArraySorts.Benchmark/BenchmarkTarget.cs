@@ -4,9 +4,6 @@ using RiceTea.ArraySorts.Config;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RiceTea.ArraySorts.Benchmark
 {
@@ -21,6 +18,9 @@ namespace RiceTea.ArraySorts.Benchmark
         [GlobalSetup]
         public void Setup()
         {
+            ArraySortsConfig.OptimizeSortedSequence = true;
+            ArraySortsConfig.OptimizeTinySequenceSorting = true;
+
             int[] array = new int[N];
             for (int i = 0; i < N; i++)
             {
@@ -43,7 +43,7 @@ namespace RiceTea.ArraySorts.Benchmark
 
         public IEnumerable<int> GenerateParams()
         {
-            for (int i = 0, j = 64; i < 4; i++, j += 64)
+            for (int i = 0, j = 256; i < 16; i++, j += 256)
             {
                 yield return j;
             }
@@ -51,6 +51,9 @@ namespace RiceTea.ArraySorts.Benchmark
 
         [Benchmark]
         public void IntroSort() => ArraySorts.IntroSort(_array.Clone() as int[]);
+
+        [Benchmark]
+        public void HeapSort() => ArraySorts.HeapSort(_array.Clone() as int[]);
 
         [Benchmark]
         public void QuickSort() => ArraySorts.QuickSort(_array.Clone() as int[]);
@@ -63,11 +66,5 @@ namespace RiceTea.ArraySorts.Benchmark
 
         [Benchmark]
         public void ShellSort() => ArraySorts.ShellSort(_array.Clone() as int[]);
-
-        [Benchmark]
-        public void BinaryInsertionSort() => ArraySorts.BinaryInsertionSort(_array.Clone() as int[]);
-
-        [Benchmark]
-        public void InsertionSort() => ArraySorts.InsertionSort(_array.Clone() as int[]);
     }
 }
