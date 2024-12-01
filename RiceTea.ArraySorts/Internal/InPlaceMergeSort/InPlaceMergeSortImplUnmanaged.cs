@@ -55,8 +55,29 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2L || SortUtils.ShortCircuitSort(ptr, count, comparer))
+            if (comparer.Compare(*ptr, *(ptrEnd - 1)) > 0)
+            {
+                long countRight = ptrEnd - pivot;
+                long countLeft = count - countRight;
+                if (countLeft == countRight) //均等情況
+                {
+                    for (T* leftIterator = ptr, rightIterator = pivot; leftIterator < pivot; leftIterator++, rightIterator++)
+                    {
+                        (*leftIterator, *rightIterator) = (*rightIterator, *leftIterator);
+                    }
+                }
+                else //不均等情況
+                {
+                    for (T* leftIterator = pivot - 1, rightIterator = ptrEnd - 1; leftIterator >= ptr; leftIterator--, rightIterator--)
+                    {
+                        T temp = *rightIterator;
+                        *rightIterator = *leftIterator;
+                        *(leftIterator + 1) = temp;
+                    }
+                    *ptr = right;
+                }
                 return;
+            }
             do
             {
                 bool isOdd = (count & 0b01) == 0b01;
