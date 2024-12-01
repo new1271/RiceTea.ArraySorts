@@ -47,7 +47,7 @@ namespace RiceTea.ArraySorts.Tester
 
             referenceSequence = sequence.Clone() as int[];
 
-            //Array.Reverse(sequence);
+            Array.Reverse(sequence);
             Shuffle(sequence);
 
             Func<int[], int[]> arrayCloneFunction = new Func<int[], int[]>(arr => arr.Clone() as int[]);

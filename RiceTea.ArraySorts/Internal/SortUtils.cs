@@ -116,7 +116,7 @@ namespace RiceTea.ArraySorts.Internal
                     {
                         T* ptr1 = ptr + 1;
                         T* ptr2 = ptr + 2;
-                        Sort3NC(ref *ptr, ref *ptr1, ref *ptr2);
+                        Sort3NC(ptr, ptr1, ptr2);
                     }
                     return true;
                 default:
@@ -126,48 +126,97 @@ namespace RiceTea.ArraySorts.Internal
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe bool Sort3NC<T>(ref T a, ref T b, ref T c)
+        private static unsafe void Sort3NC<T>(T* ptrA, T* ptrB, T* ptrC)
         {
-            bool isDirty = false;
-            if (new PackedPrimitive<T>(a) > b)
+            PackedPrimitive<T> a = *ptrA;
+            PackedPrimitive<T> b = *ptrB;
+            PackedPrimitive<T> c = *ptrC;
+            if (a < b)
             {
-                (a, b) = (b, a);
-                isDirty = true;
+                if (b > c)
+                {
+                    if (a < c)
+                    {
+                        (*ptrB, *ptrC) = (c.Value, b.Value);
+                    }
+                    else
+                    {
+                        T temp = a.Value;
+                        *ptrA = c.Value;
+                        *ptrC = b.Value;
+                        *ptrB = temp;
+                    }
+                }
+                return;
             }
-            if (new PackedPrimitive<T>(b) > c)
+            else
             {
-                (b, c) = (c, b);
-                isDirty = true;
+                if (b < c)
+                {
+                    if (a < c)
+                    {
+                        (*ptrA, *ptrB) = (b.Value, a.Value);
+                    }
+                    else
+                    {
+                        T temp = a.Value;
+                        *ptrA = b.Value;
+                        *ptrB = c.Value;
+                        *ptrC = temp;
+                    }
+                }
+                else
+                {
+                    (*ptrA, *ptrC) = (c.Value, a.Value);
+                }
             }
-            if (new PackedPrimitive<T>(a) > c)
-            {
-                (a, c) = (c, a);
-                isDirty = true;
-            }
-            return isDirty;
         }
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool Sort3<T>(ref T a, ref T b, ref T c, IComparer<T> comparer)
         {
-            bool isDirty = false;
-            if (comparer.Compare(a, b) > 0)
+            if (comparer.Compare(a, b) < 0)
             {
-                (a, b) = (b, a);
-                isDirty = true;
+                if (comparer.Compare(b, c) > 0)
+                {
+                    if (comparer.Compare(a, c) < 0)
+                    {
+                        (b, c) = (c, b);
+                    }
+                    else
+                    {
+                        T temp = a;
+                        a = c;
+                        c = b;
+                        b = temp;
+                    }
+                    return true;
+                }
+                return false;
             }
-            if (comparer.Compare(b, c) > 0)
+            else
             {
-                (b, c) = (c, b);
-                isDirty = true;
+                if (comparer.Compare(b, c) < 0)
+                {
+                    if (comparer.Compare(a, c) < 0)
+                    {
+                        (a, b) = (b, a);
+                    }
+                    else
+                    {
+                        T temp = a;
+                        a = b;
+                        b = c;
+                        c = temp;
+                    }
+                }
+                else
+                {
+                    (a, c) = (c, a);
+                }
+                return true;
             }
-            if (comparer.Compare(a, c) > 0)
-            {
-                (a, c) = (c, a);
-                isDirty = true;
-            }
-            return isDirty;
         }
 
         [Inline(InlineBehavior.Remove)]

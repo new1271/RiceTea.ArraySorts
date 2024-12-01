@@ -48,17 +48,16 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (new PackedPrimitive<T>(left) < right)
                 return;
             long count = ptrEnd - ptr;
-            if (count < 2L || SortUtils.OptimizeSortNC(ptr, ptrEnd, count))
+            if (count < 2L || SortUtils.ShortCircuitSortNC(ptr, count))
                 return;
-            int step = unchecked((int)count);
             do
             {
-                bool isOdd = (step & 0b01) == 0b01;
-                step >>= 1;
+                bool isOdd = (count & 0b01) == 0b01;
+                count >>= 1;
                 if (isOdd)
-                    step++;
-                ShellSortImplUnmanagedNC<T>.SortOnce(ptr, ptrEnd, step);
-            } while (step > 1);
+                    count++;
+                ShellSortImplUnmanagedNC<T>.SortOnce(ptr, ptrEnd, count);
+            } while (count > 1);
         }
     }
 }

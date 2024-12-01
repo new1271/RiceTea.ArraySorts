@@ -21,7 +21,7 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
             SortInternal(ptr, ptrEnd, comparer);
         }
 
-        public static void SortOnce(T* ptr, T* ptrEnd, IComparer<T> comparer, int step)
+        public static void SortOnce(T* ptr, T* ptrEnd, IComparer<T> comparer, long step)
         {
             SortCore(ptr, ptrEnd, comparer, step);
         }
@@ -29,7 +29,7 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SortInternal(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
-            int step = unchecked((int)(ptrEnd - ptr));
+            long step = ptrEnd - ptr;
             do
             {
                 step >>= 1;
@@ -39,9 +39,9 @@ namespace RiceTea.ArraySorts.Internal.ShellSort
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer, int step)
+        private static void SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer, long step)
         {
-            for (int i = 0; i < step; i++)
+            for (long i = 0; i < step; i++)
             {
                 T* ptrStart = ptr + i;
                 for (T* iterator = ptrStart; iterator < ptrEnd; iterator += step)

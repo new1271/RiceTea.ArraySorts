@@ -53,7 +53,7 @@ namespace RiceTea.ArraySorts.Internal.InPlaceMergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             int count = endIndex - startIndex;
-            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
+            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                 return;
             do
             {

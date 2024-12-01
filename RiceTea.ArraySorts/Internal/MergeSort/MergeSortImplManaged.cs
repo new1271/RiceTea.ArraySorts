@@ -3,6 +3,7 @@ using InlineMethod;
 
 using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
+using RiceTea.ArraySorts.Internal.ShellSort;
 using RiceTea.ArraySorts.Memory;
 
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             if (comparer.Compare(left, right) < 0)
                 return;
             int count = endIndex - startIndex;
-            if (count < 2 || SortUtils.OptimizeSort(list, startIndex, endIndex, count, comparer))
+            if (count < 2 || SortUtils.ShortCircuitSort(list, startIndex, count, comparer))
                 return;
             MemoryUtils.CopyToArray(space, list, startIndex, 0, count);
             MergeCore(list, space, startIndex, pivotIndex, endIndex, comparer);
