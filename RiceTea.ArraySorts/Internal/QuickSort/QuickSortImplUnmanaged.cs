@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
-using InlineMethod;
+﻿using InlineMethod;
 
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
-using RiceTea.ArraySorts.Internal.InsertionSort;
 using RiceTea.ArraySorts.Internal.MergeSort;
+
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal.QuickSort
 {
 #pragma warning disable CS8500 // 這會取得 Managed 類型的位址、大小，或宣告指向它的指標
     internal static unsafe class QuickSortImplUnmanaged<T>
     {
+        private const int MAX_LEVELS = 128;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
@@ -23,64 +24,72 @@ namespace RiceTea.ArraySorts.Internal.QuickSort
                 BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
                 return;
             }
-            SortCore(ptr, ptrEnd - 1, comparer, 0);
-            InsertionSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, comparer);
+            if (SortCore(ptr, ptrEnd, comparer))
+                return;
+            MergeSortImplUnmanaged<T>.SortWithoutCheck(ptr, ptrEnd, count, comparer);
         }
 
-        //From https://code-maze.com/csharp-quicksort-algorithm/
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void SortInternal(T* ptrStart, T* ptrLast, IComparer<T> comparer, int depth)
+        //Code from https://stackoverflow.com/questions/55008384/can-quicksort-be-implemented-in-c-without-stack-and-recursion
+        //Original from http://alienryderflex.com/quicksort/
+        [MethodImpl(MethodImplOptions.NoInlining)] //因為 stackalloc 的關係, 這裡不能內聯 (避免出現 StackOverflowException )
+        private static bool SortCore(T* ptr, T* ptrEnd, IComparer<T> comparer)
         {
-            long count = ptrLast - ptrStart + 1;
-            if (count <= 16L)
+            int* beg = stackalloc int[MAX_LEVELS];
+            int* end = stackalloc int[MAX_LEVELS];
+            int L, R;
+            int i = 0;
+
+            beg[0] = 0;
+            end[0] = unchecked((int)(ptrEnd - ptr));
+            while (i >= 0)
             {
-                if (count < 2L || SortUtils.ShortCircuitSort(ptrStart, count, comparer))
-                    return;
-                BinaryInsertionSortImplUnmanaged<T>.SortWithoutCheck(ptrStart, ptrLast + 1, comparer);
-                return;
-            }
-            if (depth >= 32) //如果堆疊深度大於 32，用合併排序對子序列做排序
-            {
-                MergeSortImplUnmanaged<T>.SortWithoutCheck(ptrStart, ptrLast + 1, count, comparer);
-                return;
-            }
-            SortCore(ptrStart, ptrLast, comparer, depth);
-        }
-
-        [Inline(InlineBehavior.Remove)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void SortCore(T* ptrStart, T* ptrLast, IComparer<T> comparer, int depth)
-        {
-            T* leftPointer = ptrStart;
-            T* rightPointer = ptrLast;
-
-            T pivot = *leftPointer;
-
-            while (leftPointer <= rightPointer)
-            {
-                while (comparer.Compare(*leftPointer, pivot) < 0)
+                L = beg[i];
+                R = end[i];
+                if (R - L > 1)
                 {
-                    leftPointer++;
-                }
+                    int M = L + ((R - L) >> 1);
+                    T piv = ptr[M];
+                    ptr[M] = ptr[L];
 
-                while (comparer.Compare(*rightPointer, pivot) > 0)
-                {
-                    rightPointer--;
+                    if (i == MAX_LEVELS - 1)
+                        return false;
+                    R--;
+                    while (L < R)
+                    {
+                        while (comparer.Compare(ptr[R], piv) >= 0 && L < R)
+                            R--;
+                        if (L < R)
+                            ptr[L++] = ptr[R];
+                        while (comparer.Compare(ptr[L], piv) <= 0 && L < R)
+                            L++;
+                        if (L < R)
+                            ptr[R--] = ptr[L];
+                    }
+                    ptr[L] = piv;
+                    M = L + 1;
+                    while (L > beg[i] && comparer.Compare(ptr[L - 1], piv) == 0)
+                        L--;
+                    while (M < end[i] && comparer.Compare(ptr[M], piv) == 0)
+                        M++;
+                    if (L - beg[i] > end[i] - M)
+                    {
+                        beg[i + 1] = M;
+                        end[i + 1] = end[i];
+                        end[i++] = L;
+                    }
+                    else
+                    {
+                        beg[i + 1] = beg[i];
+                        end[i + 1] = L;
+                        beg[i++] = M;
+                    }
                 }
-
-                if (leftPointer <= rightPointer)
+                else
                 {
-                    (*rightPointer, *leftPointer) = (*leftPointer, *rightPointer);
-                    leftPointer++;
-                    rightPointer--;
+                    i--;
                 }
             }
-
-            if (ptrStart < rightPointer)
-                SortInternal(ptrStart, rightPointer, comparer, depth + 1);
-
-            if (leftPointer < ptrLast)
-                SortInternal(leftPointer, ptrLast, comparer, depth + 1);
+            return true;
         }
     }
 }
