@@ -2,8 +2,6 @@
 using InlineMethod;
 
 using RiceTea.ArraySorts.Config;
-using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
-using RiceTea.ArraySorts.Internal.ShellSort;
 using RiceTea.ArraySorts.Memory;
 
 using System.Collections.Generic;

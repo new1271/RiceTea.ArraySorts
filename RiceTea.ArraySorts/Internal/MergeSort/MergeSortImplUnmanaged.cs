@@ -2,10 +2,7 @@
 using InlineMethod;
 
 using RiceTea.ArraySorts.Config;
-using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
-using RiceTea.ArraySorts.Internal.ShellSort;
 using RiceTea.ArraySorts.Memory;
-using RiceTea.Numerics;
 
 using System;
 using System.Collections.Generic;
@@ -67,7 +64,6 @@ namespace RiceTea.ArraySorts.Internal.MergeSort
             {
                 uint byteCount = unchecked((uint)(count * sizeof(T)));
                 uint byteCountRight = unchecked((uint)((ptrEnd - pivot) * sizeof(T)));
-                long countRight = ptrEnd - pivot;
                 UnsafeHelper.CopyBlock(space, pivot, byteCountRight);
                 UnsafeHelper.CopyBlock(ptrEnd - (pivot - ptr), ptr, byteCount - byteCountRight);
                 UnsafeHelper.CopyBlock(ptr, space, byteCountRight);
