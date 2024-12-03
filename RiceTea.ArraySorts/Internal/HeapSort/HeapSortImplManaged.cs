@@ -26,9 +26,15 @@ namespace RiceTea.ArraySorts.Internal.HeapSort
             SortCore(list, startIndex, count, comparer);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(IList<T> list, int startIndex, int endIndex, IComparer<T> comparer)
+        {
+            SortCore(list, startIndex, endIndex - startIndex, comparer);
+        }
+
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortCore(IList<T> list, int startIndex, int count, IComparer<T> comparer)
+        private static void SortCore(IList<T> list, int startIndex, int count, IComparer<T> comparer)
         {
             // 建立最大堆積
             int i;

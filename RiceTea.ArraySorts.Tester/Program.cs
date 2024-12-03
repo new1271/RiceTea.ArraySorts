@@ -13,6 +13,7 @@ namespace RiceTea.ArraySorts.Tester
 
         private enum SortFunction
         {
+            Array_Sort,
             IntroSort,
             HeapSort,
             QuickSort,
@@ -36,6 +37,8 @@ namespace RiceTea.ArraySorts.Tester
             Console.WriteLine("--------------------");
             Console.WriteLine("T[] form:");
 
+            DoTest(sequence, referenceSequence, SortFunction.Array_Sort, arrayCloneFunction);
+            GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, arrayCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.HeapSort, arrayCloneFunction);
@@ -52,6 +55,8 @@ namespace RiceTea.ArraySorts.Tester
             Console.WriteLine("--------------------");
             Console.WriteLine("List<T> form:");
 
+            DoTest(sequence, referenceSequence, SortFunction.Array_Sort, listCloneFunction);
+            GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.IntroSort, listCloneFunction);
             GC.Collect();
             DoTest(sequence, referenceSequence, SortFunction.HeapSort, listCloneFunction);
@@ -138,6 +143,40 @@ namespace RiceTea.ArraySorts.Tester
             string name;
             switch (function)
             {
+                case SortFunction.Array_Sort:
+                    {
+                        name = nameof(Array) + "." + nameof(Array.Sort);
+                        T[] testArray = testSequence as T[];
+#if !DEBUG
+                        Console.WriteLine("warm up...");
+                        {
+                            if (testArray is null)
+                                (testSequence as List<T>)?.Sort(comparer);
+                            else
+                                Array.Sort(testArray, comparer);
+                        }
+                        testSequence = cloneFunction.Invoke(sequence);
+                        testArray = testSequence as T[];
+                        GC.Collect();
+#endif
+                        Console.WriteLine("testing...");
+                        if (testArray is null)
+                        {
+                            if (testSequence is List<T> list)
+                            {
+                                stopwatch.Restart();
+                                list.Sort(comparer);
+                                stopwatch.Stop();
+                            }
+                        }
+                        else
+                        {
+                            stopwatch.Restart();
+                            Array.Sort(testArray, comparer);
+                            stopwatch.Stop();
+                        }
+                    }
+                    break;
                 case SortFunction.IntroSort:
                     {
                         name = nameof(ArraySorts.IntroSort);

@@ -4,6 +4,7 @@ using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 using RiceTea.Numerics;
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace RiceTea.ArraySorts.Internal.HeapSort
@@ -20,9 +21,15 @@ namespace RiceTea.ArraySorts.Internal.HeapSort
             SortCore(ptr, count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SortWithoutCheck(T* ptr, T* ptrEnd)
+        {
+            SortCore(ptr, ptrEnd - ptr);
+        }
+
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortCore(T* ptr, long count)
+        private static void SortCore(T* ptr, long count)
         {
             // 建立最大堆積
             long i;

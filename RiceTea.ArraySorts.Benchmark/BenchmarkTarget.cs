@@ -50,6 +50,9 @@ namespace RiceTea.ArraySorts.Benchmark
         }
 
         [Benchmark]
+        public void BuiltinSort() => Array.Sort(_array.Clone() as int[]);
+
+        [Benchmark]
         public void IntroSort() => ArraySorts.IntroSort(_array.Clone() as int[]);
 
         [Benchmark]
@@ -60,11 +63,5 @@ namespace RiceTea.ArraySorts.Benchmark
 
         [Benchmark]
         public void MergeSort() => ArraySorts.MergeSort(_array.Clone() as int[]);
-
-        [Benchmark]
-        public void InPlaceMergeSort() => ArraySorts.InPlaceMergeSort(_array.Clone() as int[]);
-
-        [Benchmark]
-        public void ShellSort() => ArraySorts.ShellSort(_array.Clone() as int[]);
     }
 }
