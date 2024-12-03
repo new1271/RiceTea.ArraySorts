@@ -1,5 +1,6 @@
 ﻿using InlineMethod;
 
+using RiceTea.ArraySorts.Config;
 using RiceTea.ArraySorts.Internal.BinaryInsertionSort;
 
 using System;
@@ -22,25 +23,33 @@ namespace RiceTea.ArraySorts.Internal.HeapSort
             long count = ptrEnd - ptr;
             if (count < 2L || SortUtils.OptimizeSort(ptr, ptrEnd, count, comparer))
                 return;
-            SortCore(ptr, ptrEnd, count, comparer);
+            SortCore(ptr, count, comparer);
         }
 
         [Inline(InlineBehavior.Remove)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortCore(T* ptr, T* ptrEnd, long count, IComparer<T> comparer)
+        public static void SortCore(T* ptr, long count, IComparer<T> comparer)
         {
             // 建立最大堆積
-            for (long i = (count >> 1) - 1; i >= 0; i--)
+            long i;
+            for (i = (count >> 1) - 1; i >= 0; i--)
             {
                 MaxHeapify(ptr, i, count - 1, comparer);
             }
-            for (long i = count - 1; i > 0; i--)
+            long target = ArraySortsConfig.OptimizeTinySequenceSorting ? 0L : 16L;
+            for (i = count - 1; i > target; i--)
             {
                 //將堆積的頭尾交換
                 T* iterator = ptr + i;
                 (*ptr, *iterator) = (*iterator, *ptr);
                 //重新整理堆積
                 MaxHeapify(ptr, 0, i - 1, comparer);
+            }
+            if (i > 0)
+            {
+                T* ptrEnd = ptr + i + 1;
+                SortUtils.Reverse(ptr, ptrEnd);
+                BinaryInsertionSortImplUnmanaged<T>.Sort(ptr, ptrEnd, comparer);
             }
         }
 

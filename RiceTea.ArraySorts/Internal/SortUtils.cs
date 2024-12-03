@@ -274,13 +274,7 @@ namespace RiceTea.ArraySorts.Internal
                     return false;
             }
             if (headCompare < 0)
-            {
-                i = startIndex;
-                for (int j = endIndex - 1; i < j; i++, j--)
-                {
-                    (list[i], list[j]) = (list[j], list[i]);
-                }
-            }
+                Reverse(list, startIndex, endIndex);
             return true;
         }
 
@@ -300,13 +294,7 @@ namespace RiceTea.ArraySorts.Internal
                     return false;
             }
             if (headCompare < 0)
-            {
-                iterator = ptr;
-                for (T* iterator2 = ptrEnd - 1; iterator < iterator2; iterator++, iterator2--)
-                {
-                    (*iterator, *iterator2) = (*iterator2, *iterator);
-                }
-            }
+                Reverse(ptr, ptrEnd);
             return true;
         }
 
@@ -326,14 +314,28 @@ namespace RiceTea.ArraySorts.Internal
                     return false;
             }
             if (headCompare < default(T))
-            {
-                iterator = ptr;
-                for (T* iterator2 = ptrEnd - 1; iterator < iterator2; iterator++, iterator2--)
-                {
-                    (*iterator, *iterator2) = (*iterator2, *iterator);
-                }
-            }
+                Reverse(ptr, ptrEnd);
             return true;
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void Reverse<T>(IList<T> list, int startIndex, int endIndex)
+        {
+            for (int i = startIndex, j = endIndex - 1; i < j; i++, j--)
+            {
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        [Inline(InlineBehavior.Remove)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void Reverse<T>(T* ptr, T* ptrEnd)
+        {
+            for (T* iterator = ptr, iterator2 = ptrEnd - 1; iterator < iterator2; iterator++, iterator2--)
+            {
+                (*iterator, *iterator2) = (*iterator2, *iterator);
+            }
         }
     }
 }
